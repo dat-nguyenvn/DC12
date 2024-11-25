@@ -378,9 +378,9 @@ def make_parse():
     parser=argparse.ArgumentParser("DC12 Demo !")
     parser.add_argument(
         "--video_path",
-        default="./assets/apple.mp4",
+        #default="./assets/apple.mp4",
         #default='/home/src/yolo/DJI_20230607090521_0006_V.mp4',
-        #default='/home/src/yolo/trimvideo.mp4',
+        default='/home/src/data/captest/trimvideo.mp4',
         #default='/home/src/yolo/lowresolution.mp4',
         #default='/home/src/yolo/DJI_20230607092838_0003_V.mp4',
         help="path to a video",
@@ -392,7 +392,7 @@ def make_parse():
     )
     parser.add_argument(
         "--save",
-        default=False,
+        default=True,
         help="Save frame and track points",
     )    
     parser.add_argument("--grid_size", type=int, default=10, help="Regular grid size")
@@ -504,7 +504,8 @@ def main(args):
             
             que2=input_queries(0,que2)
             #que2=que2.cuda()
-            queries_new=que2.cuda()
+            #queries_new=que2.cuda()
+            
             #queries_new=torch.cat((queries_new, que2), dim=0) #su dung neu class k co trong coco data
             print("shape queries_new",queries_new.shape)
             print("len id pixels topppppppppppppppppp",len(id_pixels))
