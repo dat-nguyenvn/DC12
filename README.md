@@ -15,3 +15,6 @@
 ```bash
 docker pull nvcr.io/nvidia/pytorch:23.12-py3
 
+### Download and install WildTracker
+```bash
+git clone https://github.com/dat-nguyenvn/DC12.git
