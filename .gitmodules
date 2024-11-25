@@ -1,0 +1,6 @@
+[submodule "ultralytic"]
+	path = ultralytic
+	url = https://github.com/ultralytics/ultralytics.git
+[submodule "ultralytics"]
+	path = ultralytics
+	url = https://github.com/ultralytics/ultralytics.git
