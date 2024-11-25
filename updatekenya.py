@@ -17,7 +17,7 @@ import json
 import natsort
 import imageio
 import random
-from generate_data_dynamic_detect import *
+from wildtracker.generate_data_dynamic_detect import *
 import argparse
 
 from sahi.utils.yolov8 import (
@@ -30,7 +30,7 @@ from sahi.utils.file import download_from_url
 from sahi.predict import get_prediction, get_sliced_prediction, predict
 from IPython.display import Image
 
-from ultilkenya import *
+from wildtracker.ultilkenya import *
 
 
 parser = argparse.ArgumentParser(description="DC12 parses arguments with defaults.")

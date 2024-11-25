@@ -145,7 +145,7 @@ import json
 import natsort
 import imageio
 import random
-from generate_data_dynamic_detect import *
+from wildtracker.generate_data_dynamic_detect import *
 from random import randint
 
 from sahi.utils.yolov8 import (
