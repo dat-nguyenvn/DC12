@@ -169,3 +169,11 @@ class convert_process():
         y_top_left = y_center - (height / 2)
         return np.array([x_top_left, y_top_left, width, height])
 
+
+def convert_list_dict_to_dict(list_dict_info):
+    end_dict={}
+    for idx,value in enumerate(list_dict_info):
+        end_dict[idx+1]=value
+
+    print("keyssssssssss",end_dict.keys())
+    return end_dict

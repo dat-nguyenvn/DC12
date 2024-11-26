@@ -6,7 +6,7 @@ from random import randint
 
 
 from wildtracker.utils.convert import convert_process
-
+from wildtracker.utils.utils import compute_centroid
 
 
 
@@ -182,3 +182,35 @@ class update():
 
 
         return dict_inside
+
+
+def update_bounding_box(center_points_t0, points_t1, box_t):
+    """
+    Update the bounding box based on points at time step t and t+1.
+
+    Parameters:
+    - points_t: List of points [(x1, y1), (x2, y2), ...] at time t.
+    - points_t1: List of points [(x1, y1), (x2, y2), ...] at time t+1.
+    - box_t: Original bounding box (x_center, y_center, w, h) at time t.
+
+    Returns:
+    - new_box: Updated bounding box [x_center, y_center, w, h] at time t+1.
+    """
+    # Get original bounding box center and size
+    x_center_t, y_center_t, w, h = box_t
+    
+    # Compute centroids of points at time t and time t+1
+    centroid_t = center_points_t0
+    centroid_t1 = compute_centroid(points_t1)
+    
+    # Compute shift in centroid position
+    shift_x = centroid_t1[0] - centroid_t[0]
+    shift_y = centroid_t1[1] - centroid_t[1]
+    
+    # Update bounding box center with the shift
+    new_x_center = x_center_t + shift_x
+    new_y_center = y_center_t + shift_y
+    
+    # Return the new bounding box with the same width and height
+    return [new_x_center, new_y_center, w, h],(shift_x,shift_y)
+    
