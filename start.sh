@@ -31,3 +31,11 @@ apt install python3.10-vpi3
 
 git clone https://github.com/obss/sahi.git
 
+
+ sudo docker run --gpus all -it --privileged --ipc=host --ulimit memlock=-1 \
+ -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=$DISPLAY\
+ -v /tmp/.docker.xauth:/tmp/.docker.xauth\
+ -e XAUTHORITY=/tmp/.docker.xauth\
+ -v /home/boss/mypc/phd/DC12:/DC12\
+ -v /home/boss/mypc/mount:/mount\
+ --name envgit  1cff6923bda0

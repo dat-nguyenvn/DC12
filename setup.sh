@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-cd /home/src/yolo/ultralytics
+cd ./ultralytics
 pip install -e .
 export PYTHONPATH=`pwd`:$PYTHONPATH
 
