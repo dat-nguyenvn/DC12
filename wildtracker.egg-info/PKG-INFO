@@ -69,3 +69,9 @@ pip install -e .
 export PYTHONPATH=`pwd`:$PYTHONPATH
 cd ..
 ```
+
+### Run WildTracker
+```bash 
+python3 updatekenya.py
+```
+

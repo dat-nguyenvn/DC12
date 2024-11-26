@@ -10,3 +10,4 @@ wildtracker.egg-info/dependency_links.txt
 wildtracker.egg-info/requires.txt
 wildtracker.egg-info/top_level.txt
 wildtracker/utils/__init__.py
+wildtracker/utils/crop.py

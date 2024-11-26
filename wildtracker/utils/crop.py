@@ -1,0 +1,40 @@
+def crop_bbox(image_np, bbox):
+    """
+    Crops the image using the bounding box coordinates.
+
+    Parameters:
+    - image_np: NumPy array of the image (H, W, C)
+    - bbox: list or tuple of bounding box [minx, miny, maxx, maxy]
+
+    Returns:
+    - Cropped image as a NumPy array
+    """
+    minx, miny, maxx, maxy = bbox
+    
+    # Crop the image using array slicing
+    cropped_image = image_np[miny:maxy, minx:maxx]
+
+    return cropped_image
+
+def crop_window(full_frame, center,window_size=640):
+    #center : tuple (x,y)
+    center_x=center[0]
+    center_y=center[1]
+    # Get the dimensions of the full frame
+    frame_height, frame_width = full_frame.shape[:2]
+    
+    # Half of the window size to help with calculations
+    half_window_size = window_size // 2
+
+    # Calculate the top-left corner (x, y) of the window
+    top_left_x = max(center_x - half_window_size, 0)
+    top_left_y = max(center_y - half_window_size, 0)
+
+    # Calculate the bottom-right corner, ensuring we don't go out of frame bounds
+    bottom_right_x = min(center_x + half_window_size, frame_width)
+    bottom_right_y = min(center_y + half_window_size, frame_height)
+
+    # Crop the window from the full frame
+    cropped_window = full_frame[top_left_y:bottom_right_y, top_left_x:bottom_right_x]
+
+    return cropped_window
