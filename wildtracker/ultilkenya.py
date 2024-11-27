@@ -306,9 +306,9 @@ from wildtracker.utils.convert import convert_process
 
 
 #todo here #############
-class orb_selection_method(selected_point_method):
-    def process(self,cropped_image_numpy):
-        return None
+#class orb_selection_method(selected_point_method):
+#    def process(self,cropped_image_numpy):
+#        return None
 
 #end todo here ~~~~~~~~~~~~
 

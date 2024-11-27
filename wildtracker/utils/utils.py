@@ -1,3 +1,4 @@
+import numpy as np
 def need_add_id_and_point(matched_box): #todo: add to check class
     if matched_box!=None:
         if  0 in matched_box:
@@ -92,3 +93,39 @@ class simple_box:
         self.h = height  # height of the box
         self.cls = cls  # class label
         self.id = box_id  # unique ID for the box
+
+
+def calculate_modified_iou(box1, box2):
+    # Extract top-left corner and width/height for both boxes
+    x1_1, y1_1, w1, h1 = box1  # Box 1
+    x1_2, y1_2, w2, h2 = box2  # Box 2
+    
+    # Calculate the bottom-right corner for both boxes
+    x2_1 = x1_1 + w1
+    y2_1 = y1_1 + h1
+    
+    x2_2 = x1_2 + w2
+    y2_2 = y1_2 + h2
+    
+    # Calculate the area of intersection
+    inter_x1 = max(x1_1, x1_2)
+    inter_y1 = max(y1_1, y1_2)
+    inter_x2 = min(x2_1, x2_2)
+    inter_y2 = min(y2_1, y2_2)
+
+    # If there's no intersection, return IoU as 0
+    if inter_x1 >= inter_x2 or inter_y1 >= inter_y2:
+        return 0.0
+
+    inter_area = (inter_x2 - inter_x1) * (inter_y2 - inter_y1)
+
+    # Calculate the area of each box
+    area_1 = w1 * h1
+    area_2 = w2 * h2
+
+    # Calculate the minimum area of the two boxes
+    min_area = min(area_1, area_2)
+
+    # Calculate the Modified IoU
+    modified_iou = inter_area / min_area
+    return modified_iou

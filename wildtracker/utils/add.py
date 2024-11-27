@@ -3,7 +3,7 @@ from shapely.geometry import Polygon, Point,MultiPolygon
 from wildtracker.visualization.visual import visual_image
 from wildtracker.utils.convert import convert_process
 from wildtracker.points_selection.harris import harris_selection_method
-from wildtracker.utils.utils import compute_centroid, check_box_overlap
+from wildtracker.utils.utils import compute_centroid, check_box_overlap,need_add_id_and_point
 from wildtracker.utils.update import update
 class add_points():
     def add_to_feature(self,featurecpuin,new_points):

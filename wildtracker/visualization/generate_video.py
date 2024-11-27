@@ -1,5 +1,5 @@
 import imageio
-
+import os
 
 class generate_video():
     def create_video_from_images(self,image_folder, video_name):
