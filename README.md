@@ -11,7 +11,7 @@ We have developed an ultra-fast, multi-animal recognition and tracking method sp
 
 ### Download WildTracker
 ```bash
-git clone --recurse-submodules https://github.com/dat-nguyenvn/DC12.git
+git clone --recurse-submodules git@github.com:dat-nguyenvn/DC12.git
 ```
 
 ### Setup environment
