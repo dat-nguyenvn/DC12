@@ -42,9 +42,9 @@ parser = argparse.ArgumentParser(description="DC12 parses arguments with default
 
 # Add arguments with default values
 parser.add_argument("--input_fordel_path", type=str, default='/home/src/data/captest/capture/DJI_20230720075532_0007_V_video2/frames/', help="Your name (default: 'User')")
-parser.add_argument("--save_folder", type=str, default='/home/src/yolo/ultralytics/demo_data/demo2/', help="Your age (default: 18)")
-parser.add_argument("--save_video_dir", type=str, default='/home/src/yolo/ultralytics/demo_data/demo_test.mp4', help="Your age (default: 18)")
-parser.add_argument("--save_window_path", type=str, default='/home/src/yolo/ultralytics/demo_data/window/', help="Your age (default: 18)")
+parser.add_argument("--save_folder", type=str, default='./demo_data/demo2/', help="Your age (default: 18)")
+parser.add_argument("--save_video_dir", type=str, default='./demo_data/demo_test.mp4', help="Your age (default: 18)")
+parser.add_argument("--save_window_path", type=str, default='./demo_data/window/', help="Your age (default: 18)")
 parser.add_argument("--model_detection", type=str, default='yolov8x-seg.pt', help="[yolov8n-seg.pt, yolov8x-seg.pt,yolov8m-seg.pt, yolov8n-seg.engine]")
 parser.add_argument("--length_run", type=int, default=100, help="Your age (default: 18)")
 parser.add_argument("--point_not_inmask", type=int, default=200, help="Your age (default: 18)")
