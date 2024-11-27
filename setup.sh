@@ -16,7 +16,7 @@ pip install natsort
 pip install shapely
 pip install matplotlib flow_vis tqdm tensorboard
 
-cd sahi
+cd ./sahi
 pip install -e .
 export PYTHONPATH=`pwd`:$PYTHONPATH
 cd ..

@@ -35,17 +35,18 @@ from wildtracker.points_selection import *
 from wildtracker.visualization import *
 from wildtracker.matching import matching_module,calculate_average_distance,unique_id_not_in_matched_box,center_of_box_detected
 from wildtracker.reconstruct import reconstruct_process
+from wildtracker.utils.utils import compute_centroid, check_box_overlap,need_add_id_and_point,need_increase_point_for_id
 
 
 parser = argparse.ArgumentParser(description="DC12 parses arguments with defaults.")
 
 # Add arguments with default values
-parser.add_argument("--input_fordel_path", type=str, default='/home/src/data/captest/capture/DJI_0117_video4/frames/', help="Your name (default: 'User')")
+parser.add_argument("--input_fordel_path", type=str, default='/home/src/data/captest/capture/DJI_20230720075532_0007_V_video2/frames/', help="Your name (default: 'User')")
 parser.add_argument("--save_folder", type=str, default='/home/src/yolo/ultralytics/demo_data/demo2/', help="Your age (default: 18)")
 parser.add_argument("--save_video_dir", type=str, default='/home/src/yolo/ultralytics/demo_data/demo_test.mp4', help="Your age (default: 18)")
 parser.add_argument("--save_window_path", type=str, default='/home/src/yolo/ultralytics/demo_data/window/', help="Your age (default: 18)")
 parser.add_argument("--model_detection", type=str, default='yolov8x-seg.pt', help="[yolov8n-seg.pt, yolov8x-seg.pt,yolov8m-seg.pt, yolov8n-seg.engine]")
-parser.add_argument("--length_run", type=int, default=300, help="Your age (default: 18)")
+parser.add_argument("--length_run", type=int, default=100, help="Your age (default: 18)")
 parser.add_argument("--point_not_inmask", type=int, default=200, help="Your age (default: 18)")
 parser.add_argument("--ecl_dis_match", type=int, default=10, help="Your age (default: 18)")
 parser.add_argument("--thesshold_area_each_animal", type=int, default=1000, help="Your age (default: 18)")
@@ -67,7 +68,7 @@ model =YOLO(args.model_detection) # YOLO('yolov8n-seg.pt')
 #DJI_0133_video1 : con huou
 #DJI_0601_video1
 #DJI_0117_video4 herd
-input_fordel_path="/home/src/yolo/ultralytics/demo_data/jenna/"
+#input_fordel_path="/home/src/yolo/ultralytics/demo_data/jenna/"
 
 
 result_main=init_detection(input_fordel_path)
