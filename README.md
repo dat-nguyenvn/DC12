@@ -6,9 +6,8 @@ We have developed an ultra-fast, multi-animal recognition and tracking method sp
 1. [About the Project](#about-the-project)
 2. [Features](#features)
 3. [Getting Started](#getting-started)
-   - [Prerequisites](#prerequisites)
    - [Installation](#installation)
-4. [Usage](#usage)
+
 
 
 
