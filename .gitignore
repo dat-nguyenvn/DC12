@@ -3,3 +3,4 @@ yolov8x-seg.pt
 demo_data
 sahi
 ultralytics
+jetson-inference
