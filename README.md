@@ -4,9 +4,9 @@ We have developed an ultra-fast, multi-animal recognition and tracking method sp
 
 ## Table of Contents
 1. [About the Project](#about-the-project)
-2. [Features](#features)
-3. [Getting Started](#getting-started)
-   - [Installation](#installation)
+2. [Getting Started](#getting-started)
+   - [Installation on local](#Setup-environment-on-Local)
+   - [Installation on Jetson](#Setup-environment-on-Jetson)
 
 
 
@@ -16,7 +16,7 @@ We have developed an ultra-fast, multi-animal recognition and tracking method sp
 git clone --recurse-submodules git@github.com:dat-nguyenvn/DC12.git
 ```
 
-### Setup environment
+### Setup environment on Local
 #### Docker
 ```bash
 docker pull nvcr.io/nvidia/pytorch:23.12-py3
@@ -56,5 +56,31 @@ cd ..
 ### Run WildTracker
 ```bash 
 python3 updatekenya.py
+```
+
+### Setup environment on Jetson
+#### Jetson Docker 
+```bash
+./docker-jetson.sh
+```
+#### Depend libraries
+```bash
+cd /DC12
+./jetson_setup.sh
+```
+
+
+```bash
+cd ultralytics
+pip install -e .
+export PYTHONPATH=`pwd`:$PYTHONPATH
+cd ..
+```
+
+```bash
+cd sahi
+pip install -e .
+export PYTHONPATH=`pwd`:$PYTHONPATH
+cd ..
 ```
 
