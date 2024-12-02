@@ -207,7 +207,7 @@ def process_boxes_complete_step_init(list_dict_info,tracking_list,points):
     
     list_dict_info=convert_list_dict_to_dict(list_dict_info)
 
-    print("list_dict_info aaaaaaaaaaa",list_dict_info[2].keys())
+    #print("list_dict_info aaaaaaaaaaa",list_dict_info[2].keys())
     
     
     return list_dict_info
