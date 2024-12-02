@@ -1,6 +1,9 @@
 yolov8s-seg.pt
 yolov8x-seg.pt
+yolov8n-seg.pt
 demo_data
 sahi
 ultralytics
 jetson-inference
+test
+

@@ -183,7 +183,7 @@ class visual_image():
 
         unique_values = set(tracking_list)
         #print("unique_values in reconstruct ",unique_values)
-        
+        out_img=np_image
         for unique in unique_values:
             '''
             for item in dict_inside:

@@ -36,7 +36,7 @@ from wildtracker.visualization import *
 from wildtracker.matching import matching_module,calculate_average_distance,unique_id_not_in_matched_box,center_of_box_detected
 from wildtracker.reconstruct import reconstruct_process
 from wildtracker.utils.utils import compute_centroid, check_box_overlap,need_add_id_and_point,need_increase_point_for_id
-
+from wildtracker.videosource import rtsp_stream,input_folder
 
 parser = argparse.ArgumentParser(description="DC12 parses arguments with defaults.")
 
@@ -65,22 +65,36 @@ save_folder=args.save_folder #'/home/src/yolo/ultralytics/demo_data/demo2/'
 save_window_path=args.save_window_path #'/home/src/yolo/ultralytics/demo_data/window/'
 input_fordel_path=args.input_fordel_path #'/home/src/data/captest/capture/DJI_0117_video4/frames/'
 model =YOLO(args.model_detection) # YOLO('yolov8n-seg.pt')
+
 #DJI_0133_video1 : con huou
 #DJI_0601_video1
 #DJI_0117_video4 herd
 #input_fordel_path="/home/src/yolo/ultralytics/demo_data/jenna/"
 
 
-result_main=init_detection(input_fordel_path)
+
+inputsource= rtsp_stream(rtsp_link="rtsp://192.168.144.25:8554/main.264")
+#inputsource= input_folder(args.input_fordel_path)
+
+
+h,w,c=inputsource.frame_size()
+im=inputsource.get_RGBframe_numpy()
+rgb_image=im
+
+
+result_main=init_detection(rgb_image, args.model_detection)
 trackpoint_list_tuple,id_list_intrack,history_point_inmask,list_dict_info_main,show_image = process_first_frame(result_main)
 list_dict_info_main=process_boxes_complete_step_init(list_dict_info_main,id_list_intrack,trackpoint_list_tuple)
 
 show_image=visual_image().draw_info_from_main_dict(show_image,list_dict_info_main)
+
 plt.imshow(show_image)
 plt.show()
-im = read_image(input_fordel_path+"frame_0.jpg")
-h = im.shape[0]
-w = im.shape[1]
+
+# im = read_image(input_fordel_path+"frame_0.jpg")
+# h = im.shape[0]
+# w = im.shape[1]
+
 center_window_list,border_center_point,salient_center_point=generate_centers().generate_tile_centers_border_and_salient(w,h)
 
 # im_win='/home/src/yolo/ultralytics/demo_data/demo2/frame_29.jpg'
@@ -104,7 +118,7 @@ idFrame=0
 remove_dict={}
 speed=[]
 with vpi.Backend.CPU:
-    frame = vpi.asimage(im, vpi.Format.BGR8).convert(vpi.Format.U8)
+    frame = vpi.asimage(im, vpi.Format.RGB8).convert(vpi.Format.U8)
 points_np = np.array(trackpoint_list_tuple, dtype=np.float32)
 curFeatures = vpi.asarray(points_np)
 with vpi.Backend.CUDA:
@@ -116,13 +130,23 @@ while True:
     start_time = time.time()
     print(idFrame)
     prevFeatures = curFeatures
+
+    #cuda_image = inputsource.get_frame()
+    #cvFrame = np.zeros((h, w, channels), dtype=np.uint8)
+    cvFrame=inputsource.get_frame()
+
+    #cvFrame = np.ascontiguousarray(rgbFrame[..., ::-1]) #bgr
+
     #if idFrame >= len(images_list)-1:
     if idFrame >= length_run:
         print("Video ended.")
         break
-    idFrame += 1
-    path=input_fordel_path+"frame_"+str(idFrame)+".jpg"
-    cvFrame=cv2.imread(path)
+
+
+    # idFrame += 1
+    # path=input_fordel_path+"frame_"+str(idFrame)+".jpg"
+    # cvFrame=cv2.imread(path)
+
     with vpi.Backend.CUDA:
         frame = vpi.asimage(cvFrame, vpi.Format.BGR8).convert(vpi.Format.U8)
     curFeatures, status = optflow(frame)

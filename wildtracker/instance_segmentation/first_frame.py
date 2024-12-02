@@ -18,23 +18,24 @@ from wildtracker.points_selection.apply_method import apply_processing
 from wildtracker.visualization.visual import visual_image
 from wildtracker.utils.convert import convert_process,convert_list_dict_to_dict
 
-def init_detection(input_path):
-    input_fordel_path=input_path
-    yolov8_seg_model_path = "yolov8x-seg.pt"
-    im = read_image(input_fordel_path+"frame_0.jpg")
-    h = im.shape[0]
-    w = im.shape[1]
+def init_detection(img,model_name):
+
+    # input_fordel_path=input_path
+    yolov8_seg_model_path = model_name
+    # im = read_image(input_fordel_path+"frame_0.jpg")
+    # h = im.shape[0]
+    # w = im.shape[1]
 
     detection_model_seg = AutoDetectionModel.from_pretrained(
     model_type='yolov8',
     model_path=yolov8_seg_model_path,
-    confidence_threshold=0.1,
+    confidence_threshold=0.2,
     device="cuda", # or 'cuda:0'
     )
 
 
     result = get_sliced_prediction(
-        im,
+        img,
         detection_model_seg,
         slice_height = 640,
         slice_width = 640,
