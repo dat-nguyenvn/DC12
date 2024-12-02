@@ -73,7 +73,8 @@ model =YOLO(args.model_detection) # YOLO('yolov8n-seg.pt')
 
 
 
-inputsource= rtsp_stream(rtsp_link="rtsp://192.168.144.25:8554/main.264")
+#inputsource= rtsp_stream(rtsp_link="rtsp://192.168.144.25:8554/main.264")
+inputsource= rtsp_stream(rtsp_link="rtsp://aaa:aaa@192.168.137.195:8554/streaming/live/1")
 #inputsource= input_folder(args.input_fordel_path)
 
 
