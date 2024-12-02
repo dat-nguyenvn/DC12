@@ -16,14 +16,13 @@ from sahi.utils.compatibility import fix_full_shape_list, fix_shift_amount_list
 from sahi.utils.cv import get_coco_segmentation_from_bool_mask
 from sahi.utils.import_utils import check_requirements
 
-
 class Yolov8DetectionModel(DetectionModel):
     def check_dependencies(self) -> None:
         check_requirements(["ultralytics"])
 
     def load_model(self):
         """
-        Detection model is initialized and set to self.model.
+        Detection model is initialized and set to self.model. ...
         """
 
         from ultralytics import YOLO
@@ -49,14 +48,58 @@ class Yolov8DetectionModel(DetectionModel):
             category_mapping = {str(ind): category_name for ind, category_name in enumerate(self.category_names)}
             self.category_mapping = category_mapping
 
+    # def perform_inference(self, image: np.ndarray):
+    #     """
+    #     Prediction is performed using self.model and the prediction result is set to self._original_predictions.
+    #     If predictions have masks, each prediction is a tuple like (boxes, masks).
+    #     Args:
+    #         image: np.ndarray
+    #             A numpy array that contains the image to be predicted. 3 channel image should be in RGB order.
+
+    #     """
+
+    #     from ultralytics.engine.results import Masks
+
+    #     # Confirm model is loaded
+    #     if self.model is None:
+    #         raise ValueError("Model is not loaded, load it by calling .load_model()")
+
+    #     kwargs = {"cfg": self.config_path, "verbose": False, "conf": self.confidence_threshold, "device": self.device}
+
+    #     if self.image_size is not None:
+    #         kwargs = {"imgsz": self.image_size, **kwargs}
+
+    #     prediction_result = self.model(image[:, :, ::-1], **kwargs)  # YOLOv8 expects numpy arrays to have BGR
+
+    #     if self.has_mask:
+    #         if not prediction_result[0].masks:
+    #             prediction_result[0].masks = Masks(
+    #                 torch.tensor([], device=self.model.device), prediction_result[0].boxes.orig_shape
+    #             )
+
+    #         # We do not filter results again as confidence threshold is already applied above
+    #         prediction_result = [
+    #             (
+    #                 result.boxes.data,
+    #                 result.masks.data,
+    #             )
+    #             for result in prediction_result
+    #         ]
+
+    #     else:  # If model doesn't do segmentation then no need to check masks
+    #         # We do not filter results again as confidence threshold is already applied above
+    #         prediction_result = [result.boxes.data for result in prediction_result]
+
+    #     self._original_predictions = prediction_result
+    #     self._original_shape = image.shape
     def perform_inference(self, image: np.ndarray):
         """
         Prediction is performed using self.model and the prediction result is set to self._original_predictions.
-        If predictions have masks, each prediction is a tuple like (boxes, masks).
+        Filters predictions to include only zebra, giraffe, and elephant.
+        
         Args:
             image: np.ndarray
                 A numpy array that contains the image to be predicted. 3 channel image should be in RGB order.
-
         """
 
         from ultralytics.engine.results import Masks
@@ -65,33 +108,41 @@ class Yolov8DetectionModel(DetectionModel):
         if self.model is None:
             raise ValueError("Model is not loaded, load it by calling .load_model()")
 
+        # Class IDs for zebra, giraffe, and elephant (adjust according to your dataset)
+        target_classes = {0, 1, 2}  # Replace these with the actual class IDs for your model
+
         kwargs = {"cfg": self.config_path, "verbose": False, "conf": self.confidence_threshold, "device": self.device}
 
         if self.image_size is not None:
             kwargs = {"imgsz": self.image_size, **kwargs}
 
-        prediction_result = self.model(image[:, :, ::-1], **kwargs)  # YOLOv8 expects numpy arrays to have BGR
+        # Perform prediction (YOLOv8 expects numpy arrays in BGR order)
+        prediction_result = self.model(image[:, :, ::-1], **kwargs)
 
-        if self.has_mask:
-            if not prediction_result[0].masks:
-                prediction_result[0].masks = Masks(
-                    torch.tensor([], device=self.model.device), prediction_result[0].boxes.orig_shape
-                )
+        filtered_predictions = []
+        for result in prediction_result:
+            if self.has_mask:
+                if not result.masks:
+                    result.masks = Masks(
+                        torch.tensor([], device=self.model.device), result.boxes.orig_shape
+                    )
 
-            # We do not filter results again as confidence threshold is already applied above
-            prediction_result = [
-                (
-                    result.boxes.data,
-                    result.masks.data,
-                )
-                for result in prediction_result
-            ]
+                # Filter by class ID and store the results
+                filtered_boxes = []
+                filtered_masks = []
+                for box, mask in zip(result.boxes.data, result.masks.data):
+                    if int(box[-1]) in target_classes:  # Class ID is usually the last element in box data
+                        filtered_boxes.append(box)
+                        filtered_masks.append(mask)
 
-        else:  # If model doesn't do segmentation then no need to check masks
-            # We do not filter results again as confidence threshold is already applied above
-            prediction_result = [result.boxes.data for result in prediction_result]
+                filtered_predictions.append((torch.stack(filtered_boxes), torch.stack(filtered_masks)) if filtered_boxes else (torch.empty((0,)), torch.empty((0,))))
 
-        self._original_predictions = prediction_result
+            else:
+                # Filter boxes when there are no masks
+                filtered_boxes = [box for box in result.boxes.data if int(box[-1]) in target_classes]
+                filtered_predictions.append(torch.stack(filtered_boxes) if filtered_boxes else torch.empty((0,)))
+
+        self._original_predictions = filtered_predictions
         self._original_shape = image.shape
 
     @property
