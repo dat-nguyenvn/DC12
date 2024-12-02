@@ -7,8 +7,8 @@ import numpy as np
 from natsort import natsorted
 
 
-# from jetson_utils import videoSource, videoOutput
-# import jetson.utils
+from jetson_utils import videoSource, videoOutput
+import jetson.utils
 
 
 class videosourceprovider:
