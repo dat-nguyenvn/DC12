@@ -6,7 +6,7 @@
 	url = https://github.com/ultralytics/ultralytics.git
 [submodule "sahi"]
 	path = sahi
-	url = https://github.com/obss/sahi.git
+	url = https://github.com/dat-nguyenvn/DC12/tree/sahi-filter
 [submodule "jetson-inference"]
 	path = jetson-inference
 	url = https://github.com/dusty-nv/jetson-inference.git
