@@ -5,8 +5,8 @@ We have developed an ultra-fast, multi-animal recognition and tracking method sp
 ## Table of Contents
 1. [About the Project](#about-the-project)
 2. [Getting Started](#getting-started)
-   - [Installation on local](#Setup-environment-on-Local)
-   - [Installation on Jetson](#Setup-environment-on-Jetson)
+   - [Installation on local machine](#Setup-environment-on-Local)
+   - [Installation on Jetson Orin AGX](#Setup-environment-on-Jetson)
 
 
 
