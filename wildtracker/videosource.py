@@ -1,10 +1,16 @@
 import cv2  
 #from jetson_utils import videoSource, videoOutput, Log
-from jetson_utils import videoSource, videoOutput
-import jetson.utils
+
 import os
 import sys
 import numpy as np
+from natsort import natsorted
+
+
+# from jetson_utils import videoSource, videoOutput
+# import jetson.utils
+
+
 class videosourceprovider:
     """Base class for frame providers."""
     def get_frame(self):
@@ -23,6 +29,7 @@ class rtsp_stream(videosourceprovider):
     def __init__(self, rtsp_link="rtsp://192.168.144.25:8554/main.264"):
         self.rtsp = videoSource(rtsp_link, argv=sys.argv) 
         self.output = videoOutput('', argv=sys.argv) 
+        self.index = 0
 
 
 
@@ -32,6 +39,7 @@ class rtsp_stream(videosourceprovider):
         frame = self.rtsp.Capture(format='rgb8', timeout=1000)
         np_frame=jetson.utils.cudaToNumpy(frame)
         np_frame=np.ascontiguousarray(np_frame[..., ::-1])
+        self.index += 1
           #type cuda image  #RGB
         return np_frame
 
@@ -70,10 +78,13 @@ class usb_camera(videosourceprovider):
 
 class input_folder(videosourceprovider):
     def __init__(self, input_folder):
-        self.image_files = sorted([os.path.join(input_folder, f) for f in os.listdir(input_folder) if f.endswith(('.png', '.jpg', '.jpeg'))])
+        self.image_files = [os.path.join(input_folder, f) for f in os.listdir(input_folder) if f.endswith(('.png', '.jpg', '.jpeg'))]
+        self.image_files = natsorted(self.image_files)
+
         self.index = 0
     def get_frame(self):
         if self.index < len(self.image_files):
+            print("self.image_files[self.index]",self.image_files[self.index])
             frame = cv2.imread(self.image_files[self.index])
             self.index += 1
             return frame

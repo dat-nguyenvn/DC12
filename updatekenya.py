@@ -11,6 +11,8 @@ import random
 import argparse
 import time
 import vpi
+# import matplotlib
+# matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import os
 import json
@@ -73,8 +75,8 @@ model =YOLO(args.model_detection) # YOLO('yolov8n-seg.pt')
 
 
 
-inputsource= rtsp_stream(rtsp_link="rtsp://192.168.144.25:8554/main.264")
-#inputsource= input_folder(args.input_fordel_path)
+#inputsource= rtsp_stream(rtsp_link="rtsp://192.168.144.25:8554/main.264")
+inputsource= input_folder(args.input_fordel_path)
 
 
 h,w,c=inputsource.frame_size()
@@ -143,7 +145,7 @@ while True:
         break
 
 
-    # idFrame += 1
+    idFrame =inputsource.index 
     # path=input_fordel_path+"frame_"+str(idFrame)+".jpg"
     # cvFrame=cv2.imread(path)
 

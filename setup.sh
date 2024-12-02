@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-export DEBIAN_FRONTEND=noninteractive
+#export DEBIAN_FRONTEND=noninteractive
 
 cd ./ultralytics
 pip install -e .
