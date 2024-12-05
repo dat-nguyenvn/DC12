@@ -4,7 +4,7 @@
 [submodule "jetson-inference"]
 	path = jetson-inference
 	url = https://github.com/dusty-nv/jetson-inference.git
-
 [submodule "sahi"]
 	path = sahi
-	url = https://github.com/dat-nguyenvn/sahifilter.git
+	url = git@github.com:dat-nguyenvn/sahifilter.git
+	#url = https://github.com/dat-nguyenvn/sahifilter.git
