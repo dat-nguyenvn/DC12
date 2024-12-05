@@ -57,17 +57,17 @@ def strategy_pick_window(step,list_all_center,border_centers,salient_centers,cur
     big_list=[border_centers,salient_centers,current_track_points]
     current_list = big_list[step % 3]
 
-    if step%3==0: #border
-        center=current_list[step // 3 % len(current_list)]
-        win_color=(255, 255, 0)
-    elif step%3==1:  #salient
-        center=current_list[step // 3 % len(current_list)]
-        win_color=(0, 255, 0)
-    else : #step%3==2:
-        center =random.choice(current_track_points)
-        win_color=(255, 0, 0)
+    # if step%3==0: #border
+    #     center=current_list[step // 3 % len(current_list)]
+    #     win_color=(255, 255, 0)
+    # elif step%3==1:  #salient
+    #     center=current_list[step // 3 % len(current_list)]
+    #     win_color=(0, 255, 0)
+    # else : #step%3==2:
+    #     center =random.choice(current_track_points)
+    #     win_color=(255, 0, 0)
 
-    #center=random.choice(list_all_center)
+    center=random.choice(list_all_center)
     # center=random.choice(current_track_points)
-    # win_color=(255, 0, 0)
+    win_color=(255, 0, 0)
     return center,win_color
