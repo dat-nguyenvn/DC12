@@ -45,7 +45,7 @@ docker run --gpus all -it --privileged --ipc=host --ulimit memlock=-1 \
 cd /DC12
 ./setup.sh
 ```
-
+* Mount your folder if need
 
 ```bash
 cd ultralytics
@@ -70,6 +70,7 @@ python3 updatekenya.py
 #### Jetson Docker 
 ```bash
 ./docker-jetson.sh
+
 ```
 #### Depend libraries
 ```bash
