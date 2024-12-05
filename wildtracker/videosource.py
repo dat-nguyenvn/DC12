@@ -42,7 +42,11 @@ class rtsp_stream(videosourceprovider):
         self.index += 1
           #type cuda image  #RGB
         return np_frame
-
+    def get_cuda_frame(self):
+        #format avaiable : rgb8 , rgb32f; 
+        # detail check here:https://github.com/dusty-nv/jetson-inference/blob/master/docs/aux-streaming.md#rtsp
+        frame = self.rtsp.Capture(format='rgb8', timeout=1000)
+        return frame
 
     def get_RGBframe_numpy(self):
         frame=self.get_frame()

@@ -1,9 +1,7 @@
 [submodule "ultralytics"]
 	path = ultralytics
 	url = https://github.com/ultralytics/ultralytics.git
-[submodule "sahi"]
-	path = sahi
-	url = https://github.com/obss/sahi.git
 [submodule "jetson-inference"]
 	path = jetson-inference
 	url = https://github.com/dusty-nv/jetson-inference.git
+

@@ -40,6 +40,9 @@ from wildtracker.reconstruct import reconstruct_process
 from wildtracker.utils.utils import compute_centroid, check_box_overlap,need_add_id_and_point,need_increase_point_for_id
 from wildtracker.videosource import rtsp_stream,input_folder
 
+from jetson_utils import videoSource, videoOutput
+import jetson.utils
+
 parser = argparse.ArgumentParser(description="DC12 parses arguments with defaults.")
 
 # Add arguments with default values
@@ -48,7 +51,7 @@ parser.add_argument("--save_folder", type=str, default='./demo_data/demo2/', hel
 parser.add_argument("--save_video_dir", type=str, default='./demo_data/demo_test.mp4', help="Your age (default: 18)")
 parser.add_argument("--save_window_path", type=str, default='./demo_data/window/', help="Your age (default: 18)")
 parser.add_argument("--model_detection", type=str, default='yolov8x-seg.pt', help="[yolov8n-seg.pt, yolov8x-seg.pt,yolov8m-seg.pt, yolov8n-seg.engine]")
-parser.add_argument("--length_run", type=int, default=100, help="Your age (default: 18)")
+parser.add_argument("--length_run", type=int, default=200, help="Your age (default: 18)")
 parser.add_argument("--point_not_inmask", type=int, default=200, help="Your age (default: 18)")
 parser.add_argument("--ecl_dis_match", type=int, default=10, help="Your age (default: 18)")
 parser.add_argument("--thesshold_area_each_animal", type=int, default=1000, help="Your age (default: 18)")
@@ -76,6 +79,7 @@ model =YOLO(args.model_detection) # YOLO('yolov8n-seg.pt')
 
 
 inputsource= rtsp_stream(rtsp_link="rtsp://192.168.144.25:8554/main.264")
+output = jetson.utils.videoOutput("rtsp://192.168.144.23:1234/output")
 
 #inputsource= input_folder(args.input_fordel_path)
 
@@ -141,6 +145,11 @@ while True:
     #cuda_image = inputsource.get_frame()
     #cvFrame = np.zeros((h, w, channels), dtype=np.uint8)
     cvFrame=inputsource.get_frame()
+    #cuda_frame=inputsource.get_cuda_frame()
+    #output.Render(cuda_frame)  
+    # cuda_frame = jetson.utils.cudaFromNumpy(cvFrame)
+
+    # output.Render(cuda_frame)    
 
     #cvFrame = np.ascontiguousarray(rgbFrame[..., ::-1]) #bgr
 
@@ -266,6 +275,9 @@ while True:
     show_end_image=visual_image().draw_window(rgb_image,center_crop,color=window_color)
     show_end_image=visual_image().add_text_with_background(show_end_image,text_fps)
     show_end_image=visual_image().add_text_with_background(show_end_image,text_image_size, position=(w-1500,10) )
+    cuda_frame = jetson.utils.cudaFromNumpy(show_end_image)
+
+    output.Render(cuda_frame)    
 
     # plt.imshow(show_end_image)
     # plt.show()    

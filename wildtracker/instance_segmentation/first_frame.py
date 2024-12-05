@@ -29,7 +29,7 @@ def init_detection(img,model_name):
     detection_model_seg = AutoDetectionModel.from_pretrained(
     model_type='yolov8',
     model_path=yolov8_seg_model_path,
-    confidence_threshold=0.2,
+    confidence_threshold=0.1,
     device="cuda", # or 'cuda:0'
     )
 
