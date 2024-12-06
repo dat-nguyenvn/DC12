@@ -5,3 +5,6 @@
 	path = jetson-inference
 	url = https://github.com/dusty-nv/jetson-inference.git
 
+[submodule "sahi"]
+	path = sahi
+	url = git@github.com:dat-nguyenvn/sahifilter.git
