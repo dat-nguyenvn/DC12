@@ -1,5 +1,5 @@
 ![Alt text](images/title.png)
-#### About the Project
+### About the Project:
 We have developed an ultra-fast, multi-animal recognition and tracking method specifically designed for drones, with applications in wildlife monitoring and conservation. At the core of our hardware system is the Jetson Orin AGX that integrated into the drone to enable the deployment of advanced deep learning techniques. The software provides a dynamic, autonomous tracking system, offering conservation scientists an innovative alternative to traditional camera trap technology. The research is part of [WildDrone project](https://wilddrone.eu/)
 
 ## Table of Contents
