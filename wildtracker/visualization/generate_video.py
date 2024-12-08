@@ -15,7 +15,7 @@ class generate_video():
         # Construct the full paths to the images
         #for img in images:
         for i in range(len(images)-1):
-            image_paths.append(image_folder+'frame_'+ str(i+1)+'.jpg')
+            image_paths.append(image_folder+'frame_'+ str(i+3)+'.jpg')
 
         # Read images and write to video
         with imageio.get_writer(video_name, format='mp4',fps=10) as writer:

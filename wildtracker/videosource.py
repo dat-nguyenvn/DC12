@@ -7,8 +7,8 @@ import numpy as np
 from natsort import natsorted
 
 
-from jetson_utils import videoSource, videoOutput
-import jetson.utils
+#from jetson_utils import videoSource, videoOutput
+#import jetson.utils
 
 
 class videosourceprovider:
@@ -91,11 +91,10 @@ class input_folder(videosourceprovider):
             print("self.image_files[self.index]",self.image_files[self.index])
             frame = cv2.imread(self.image_files[self.index])
             self.index += 1
-            return frame
-        else:
-            return None  
+        return frame  
 
     def frame_size(self):
+        self.index =0
         frame=self.get_frame()
         height, width, channels = frame.shape
         #channels=3

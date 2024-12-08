@@ -45,8 +45,10 @@ def reconstruct_process(np_image,dict_coco_annotations,cur_feature,tracking_list
                 # plt.show()
             '''
 
+
         if unique in dict_coco_annotations:
             item = dict_coco_annotations[unique]
+            print("itemmmm ahahaha",item)
             box_ori=item['ori_bbox']
             #box_previous=find_box_by_id(list_boxes_complete_step_t,unique)
             center_t0=item['ori_center_points']

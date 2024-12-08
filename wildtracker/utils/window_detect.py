@@ -67,7 +67,7 @@ def strategy_pick_window(step,list_all_center,border_centers,salient_centers,cur
     #     center =random.choice(current_track_points)
     #     win_color=(255, 0, 0)
 
-    center=random.choice(list_all_center)
-    # center=random.choice(current_track_points)
+    #center=random.choice(list_all_center)
+    center=random.choice(current_track_points)
     win_color=(255, 0, 0)
     return center,win_color

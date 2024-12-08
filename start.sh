@@ -36,6 +36,7 @@ git clone https://github.com/obss/sahi.git
  -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=$DISPLAY\
  -v /tmp/.docker.xauth:/tmp/.docker.xauth\
  -e XAUTHORITY=/tmp/.docker.xauth\
- -v /home/boss/mypc/phd/DC12:/DC12\
- -v /home/boss/mypc/mount:/mount\
- --name envgit  1cff6923bda0
+ -v /home/ah23975/mypc/2024/DC12:/DC12\
+ -v /home/ah23975/mypc/mount:/mount\
+ -v /media/ah23975/Crucial\ X9:/data \
+ --name mainenvgit 1cff6923bda0

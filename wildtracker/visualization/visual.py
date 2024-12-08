@@ -124,7 +124,7 @@ class visual_image():
 
         if type(data_list) is dict:
             for key, item in data_list.items():
-                
+                print(item)
                 bbox = item['bbox']
                 x_top_left, y_top_left, w, h = bbox
                 

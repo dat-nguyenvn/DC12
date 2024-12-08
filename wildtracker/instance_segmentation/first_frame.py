@@ -29,7 +29,7 @@ def init_detection(img,model_name):
     detection_model_seg = AutoDetectionModel.from_pretrained(
     model_type='yolov8',
     model_path=yolov8_seg_model_path,
-    confidence_threshold=0.1,
+    confidence_threshold=0.5,
     device="cuda", # or 'cuda:0'
     )
 
@@ -191,8 +191,9 @@ def process_boxes_complete_step_init(list_dict_info,tracking_list,points):
     print("list_dict_info",list_dict_info)
     
     for idx,value in enumerate(list_dict_info):
+
         value['image_id']=idx+1
-        #value[bbox]=
+        value['bbox']=value['bbox']
         value['ori_center_points']=id_center_dict[idx+1]
         value['ori_bbox']=value['bbox']
         value['color']=(randint(0, 255),randint(0, 255),randint(0, 255))

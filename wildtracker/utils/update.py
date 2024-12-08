@@ -40,7 +40,7 @@ class update():
         #             history_points_in_mask[i] += 1
 
         return history_points_in_mask
-    def update_list_dict_info(self,list_dict_info,newid, bbox,groupid_center,list_tuple_five_points,conf,threshold_conf=0.8):
+    def update_list_dict_info(self,list_dict_info,newid, bbox,groupid_center,list_tuple_five_points,conf,threshold_conf=2):
         #use for new ID
 
         if conf>threshold_conf:
@@ -107,6 +107,7 @@ class update():
                 dict_inside[value]['ori_bbox']=box_yolo
                 dict_inside[value]['ori_center_points']=self.update_points_group_center(value,tracking_list,points)
                 dict_inside[value]['score']+=yolo_detector[0].boxes.conf.cpu().numpy()[idx]
+                
             if value!=0 and yolo_detector[0].boxes.conf.cpu().numpy()[idx]<threshold_box_conf:
                 dict_inside[value]['score']+=yolo_detector[0].boxes.conf.cpu().numpy()[idx]
                 if dict_inside[value]['score']>0.8:
@@ -172,13 +173,16 @@ class update():
                 predict_basedeq4=self.predict_box_based_equ4(drix,driy,x_pre_top,y_pre_top,box_yolo[0],box_yolo[1])
                 
                 if type(dict_inside[value]['bbox']) is tuple:
+                    dict_inside[value]['ori_bbox']=list(dict_inside[value]['bbox'])
                     dict_inside[value]['bbox']=list(dict_inside[value]['bbox'])
+                    
                 else:
                     print("dict_inside[value]['bbox']",dict_inside[value]['bbox'])
                     new_box=dict_inside[value]['bbox']
                     new_box[0]=predict_basedeq4[0]
                     new_box[1]=predict_basedeq4[1]
                     dict_inside[value]['bbox']=new_box
+                    dict_inside[value]['ori_bbox']=new_box
 
 
         return dict_inside

@@ -40,13 +40,13 @@ from wildtracker.reconstruct import reconstruct_process
 from wildtracker.utils.utils import compute_centroid, check_box_overlap,need_add_id_and_point,need_increase_point_for_id
 from wildtracker.videosource import rtsp_stream,input_folder
 
-from jetson_utils import videoSource, videoOutput
-import jetson.utils
+#from jetson_utils import videoSource, videoOutput
+#import jetson.utils
 
 parser = argparse.ArgumentParser(description="DC12 parses arguments with defaults.")
 
 # Add arguments with default values
-parser.add_argument("--input_fordel_path", type=str, default='/home/src/data/captest/capture/DJI_20230720075532_0007_V_video2/frames/', help="Your name (default: 'User')")
+parser.add_argument("--input_fordel_path", type=str, default='/data/captest/capture/DJI_0117_video4/frames/', help="Your name (default: 'User')")
 parser.add_argument("--save_folder", type=str, default='./demo_data/demo2/', help="Your age (default: 18)")
 parser.add_argument("--save_video_dir", type=str, default='./demo_data/demo_test.mp4', help="Your age (default: 18)")
 parser.add_argument("--save_window_path", type=str, default='./demo_data/window/', help="Your age (default: 18)")
@@ -74,17 +74,18 @@ model =YOLO(args.model_detection) # YOLO('yolov8n-seg.pt')
 #DJI_0133_video1 : con huou
 #DJI_0601_video1
 #DJI_0117_video4 herd
+#DJI_20230720075532_0007_V_video2 : clear 4 zebra
 #input_fordel_path="/home/src/yolo/ultralytics/demo_data/jenna/"
 
 
 
-inputsource= rtsp_stream(rtsp_link="rtsp://192.168.144.25:8554/main.264")
-output = jetson.utils.videoOutput("rtsp://192.168.144.23:1234/output")
+#inputsource= rtsp_stream(rtsp_link="rtsp://192.168.144.25:8554/main.264")
+#output = jetson.utils.videoOutput("rtsp://192.168.144.23:1234/output")
 
 #inputsource= input_folder(args.input_fordel_path)
 
 #inputsource= rtsp_stream(rtsp_link="rtsp://aaa:aaa@192.168.137.195:8554/streaming/live/1")
-#inputsource= input_folder(args.input_fordel_path)
+inputsource= input_folder(args.input_fordel_path)
 
 
 
@@ -195,7 +196,10 @@ while True:
     # plt.show()
 
     center_crop,window_color=strategy_pick_window(idFrame,center_window_list,border_center_point,salient_center_point,list_of_tuples)
+    print("cvFrame",cvFrame.shape)
+    
     window_detection=crop_window(cvFrame,center_crop)
+    print("window_detection", window_detection.shape)
     out_detector=model.predict(window_detection,show_boxes=True, save_crop=False ,show_labels=False,show_conf=False,save=False, classes=[20,22,23],conf=0.3,imgsz=(640,640))
 
     history_point_inmask = [x + 1 for x in history_point_inmask]
@@ -210,11 +214,11 @@ while True:
 
         box_id=matching_module().matching1(id_list_intrack,poatabel)
         box_id2=matching_module().matching2(box_id,id_list_intrack,out_detector,center_crop,curFeatures.cpu(),threshold_ecl_dis_match=ecl_dis_match)
-        print("outttttttttt .boxes.conf.cpu().numpy()[idx]",out_detector[0].boxes.conf.cpu().numpy().shape)
+        #print("outttttttttt .boxes.conf.cpu().numpy()[idx]",out_detector[0].boxes.conf.cpu().numpy().shape)
 
 
-        list_dict_info_main=update().step_accumulate(list_dict_info_main,out_detector,id_list_intrack,list_of_tuples,box_id2,center_crop)
-        list_dict_info_main=update().update_bounding_box_based_on_eq4(list_dict_info_main,out_detector,id_list_intrack,list_of_tuples,box_id2,center_crop)
+        # list_dict_info_main=update().step_accumulate(list_dict_info_main,out_detector,id_list_intrack,list_of_tuples,box_id2,center_crop)
+        # list_dict_info_main=update().update_bounding_box_based_on_eq4(list_dict_info_main,out_detector,id_list_intrack,list_of_tuples,box_id2,center_crop)
 
         save_window=visual_image().draw_all_on_window(out_detector,box_id2,list_dict_info_main,curFeatures.cpu(),center_crop,id_list_intrack)
         # plt.imshow(save_window)
@@ -275,9 +279,10 @@ while True:
     show_end_image=visual_image().draw_window(rgb_image,center_crop,color=window_color)
     show_end_image=visual_image().add_text_with_background(show_end_image,text_fps)
     show_end_image=visual_image().add_text_with_background(show_end_image,text_image_size, position=(w-1500,10) )
-    cuda_frame = jetson.utils.cudaFromNumpy(show_end_image)
+    
+    #cuda_frame = jetson.utils.cudaFromNumpy(show_end_image)
 
-    output.Render(cuda_frame)    
+    #output.Render(cuda_frame)    
 
     # plt.imshow(show_end_image)
     # plt.show()    
