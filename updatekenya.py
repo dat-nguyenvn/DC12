@@ -33,6 +33,8 @@ from wildtracker.generate_data_dynamic_detect import *
 from wildtracker.ultilkenya import *
 from wildtracker.utils import *
 from wildtracker.instance_segmentation import *
+from wildtracker.instance_segmentation.first_frame import filter_init_detection
+
 from wildtracker.points_selection import *
 from wildtracker.visualization import *
 from wildtracker.matching import matching_module,calculate_average_distance,unique_id_not_in_matched_box,center_of_box_detected
@@ -51,7 +53,7 @@ parser.add_argument("--save_folder", type=str, default='./demo_data/demo2/', hel
 parser.add_argument("--save_video_dir", type=str, default='./demo_data/demo_test.mp4', help="Your age (default: 18)")
 parser.add_argument("--save_window_path", type=str, default='./demo_data/window/', help="Your age (default: 18)")
 parser.add_argument("--model_detection", type=str, default='yolov8x-seg.pt', help="[yolov8n-seg.pt, yolov8x-seg.pt,yolov8m-seg.pt, yolov8n-seg.engine]")
-parser.add_argument("--length_run", type=int, default=200, help="Your age (default: 18)")
+parser.add_argument("--length_run", type=int, default=150, help="Your age (default: 18)")
 parser.add_argument("--point_not_inmask", type=int, default=200, help="Your age (default: 18)")
 parser.add_argument("--ecl_dis_match", type=int, default=10, help="Your age (default: 18)")
 parser.add_argument("--thesshold_area_each_animal", type=int, default=1000, help="Your age (default: 18)")
@@ -95,11 +97,19 @@ rgb_image=im
 
 
 result_main=init_detection(rgb_image, args.model_detection)
+#result_main=filter_init_detection(result_main)
 trackpoint_list_tuple,id_list_intrack,history_point_inmask,list_dict_info_main,show_image = process_first_frame(result_main)
 list_dict_info_main=process_boxes_complete_step_init(list_dict_info_main,id_list_intrack,trackpoint_list_tuple)
 
+rm_list=check_live_info().check_main_dict_by_id(list_dict_info_main)
+list_dict_info_main=remove_intrack().remove_key_in_dict(list_dict_info_main,rm_list)
+trackpoint_list_tuple,id_list_intrack,history_point_inmask=remove_intrack().apply_remove_first_step(rm_list,trackpoint_list_tuple,id_list_intrack,history_point_inmask)
+print("rm_list",rm_list)
+
 show_image=visual_image().draw_info_from_main_dict(show_image,list_dict_info_main)
 
+#show_image=visual_image().visual_bounding_box_of_dict(list_dict_info_main,show_image,id_list_intrack)
+ 
 plt.imshow(show_image)
 plt.show()
 
@@ -133,11 +143,18 @@ with vpi.Backend.CPU:
     frame = vpi.asimage(im, vpi.Format.RGB8).convert(vpi.Format.U8)
 points_np = np.array(trackpoint_list_tuple, dtype=np.float32)
 curFeatures = vpi.asarray(points_np)
+
+
+
 with vpi.Backend.CUDA:
     optflow = vpi.OpticalFlowPyrLK(frame, curFeatures,5)
 
 #start_time = time.time()
 
+
+
+with vpi.Backend.CUDA:
+    optflow = vpi.OpticalFlowPyrLK(frame, curFeatures,5)
 while True:
     start_time = time.time()
     print(idFrame)
@@ -175,11 +192,11 @@ while True:
 
 
 
-    idx_list_need_remove_status=check_live_info().check_and_find_remove_list(sta=status,history_point=history_point_inmask,threshold_point_not_inmask=point_not_inmask)
+    idx_list_need_remove_status=check_live_info().check_and_find_remove_list(sta=status,history_point=history_point_inmask,threshold_point_not_inmask=point_not_inmask,cur_point= curFeatures.cpu(),ID_list=id_list_intrack,dict_inside=list_dict_info_main)
     row_at_the_edge=np.where(np.any(curFeatures.cpu() < 5, axis=1))[0].tolist()
     if row_at_the_edge!=[]:
         print("row_at_the_edge",row_at_the_edge)
-    row_at_the_edge=[]    
+    #row_at_the_edge=[]    
     idx_list_need_remove=list(set(idx_list_need_remove_status + row_at_the_edge))
     if len(idx_list_need_remove)>0:
         curFeatures, status,id_list_intrack,history_point_inmask=remove_intrack().apply_remove(idx_list_need_remove,curFeatures,status,id_list_intrack,history_point_inmask)
@@ -196,10 +213,10 @@ while True:
     # plt.show()
 
     center_crop,window_color=strategy_pick_window(idFrame,center_window_list,border_center_point,salient_center_point,list_of_tuples)
-    print("cvFrame",cvFrame.shape)
+    #print("cvFrame",cvFrame.shape)
     
     window_detection=crop_window(cvFrame,center_crop)
-    print("window_detection", window_detection.shape)
+    #print("window_detection", window_detection.shape)
     out_detector=model.predict(window_detection,show_boxes=True, save_crop=False ,show_labels=False,show_conf=False,save=False, classes=[20,22,23],conf=0.3,imgsz=(640,640))
 
     history_point_inmask = [x + 1 for x in history_point_inmask]
@@ -213,11 +230,12 @@ while True:
         
 
         box_id=matching_module().matching1(id_list_intrack,poatabel)
+        #list_dict_info_main=update().step_update_detected_bbox_to_main_dict(list_dict_info_main,out_detector,id_list_intrack,list_of_tuples,box_id,center_crop)
         box_id2=matching_module().matching2(box_id,id_list_intrack,out_detector,center_crop,curFeatures.cpu(),threshold_ecl_dis_match=ecl_dis_match)
         #print("outttttttttt .boxes.conf.cpu().numpy()[idx]",out_detector[0].boxes.conf.cpu().numpy().shape)
 
 
-        # list_dict_info_main=update().step_accumulate(list_dict_info_main,out_detector,id_list_intrack,list_of_tuples,box_id2,center_crop)
+        list_dict_info_main=update().step_accumulate(list_dict_info_main,out_detector,id_list_intrack,list_of_tuples,box_id2,center_crop)
         # list_dict_info_main=update().update_bounding_box_based_on_eq4(list_dict_info_main,out_detector,id_list_intrack,list_of_tuples,box_id2,center_crop)
 
         save_window=visual_image().draw_all_on_window(out_detector,box_id2,list_dict_info_main,curFeatures.cpu(),center_crop,id_list_intrack)
@@ -232,7 +250,7 @@ while True:
         save_2d_list_to_txt(poatabel,file_path_txt)
 
 
-        idx_list_need_remove=matching_module().filter_poa_table(id_list_intrack,poatabel)
+        idx_list_need_remove=matching_module().filter_poa_table(id_list_intrack,poatabel) # remove points in belong to same object
 
         if len(idx_list_need_remove)>0:
             curFeatures, status,id_list_intrack,history_point_inmask=remove_intrack().apply_remove(idx_list_need_remove,curFeatures,status,id_list_intrack,history_point_inmask)

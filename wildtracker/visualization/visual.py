@@ -28,6 +28,7 @@ class visual_image():
 
         # Draw the polygon outline on the image
         result_image = image_np.copy()
+
         cv2.polylines(result_image, [polygon_points], isClosed=True, color=color, thickness=thickness)
 
         return result_image
@@ -104,48 +105,51 @@ class visual_image():
             for item in data_list:
                 
                 bbox = item['bbox']
-                x_top_left, y_top_left, w, h = bbox
-                
-                # Convert bbox from center (x, y) to top-left (x1, y1) for OpenCV's rectangle function
-                x1 = int(x_top_left)
-                y1 = int(y_top_left)
-                x2 = int(x_top_left + w )
-                y2 = int(y_top_left + h )
-                
-                # Draw rectangle on the image (blue color with thickness 2)
-                cv2.rectangle(np_image, (x1, y1), (x2, y2), color=(255, 0, 0), thickness=2)
-                
-                # Optionally, display the category name at the top of the bounding box
-                category_name = item.get('category_name', 'Unknown')
-                category_name='animal'
-                cv2.putText(np_image, category_name, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 
-                            fontScale=0.5, color=(255, 0, 0), thickness=1)      
+                if len (bbox)==4:
+                    x_top_left, y_top_left, w, h = bbox
+                    
+                    # Convert bbox from center (x, y) to top-left (x1, y1) for OpenCV's rectangle function
+                    x1 = int(x_top_left)
+                    y1 = int(y_top_left)
+                    x2 = int(x_top_left + w )
+                    y2 = int(y_top_left + h )
+                    
+                    # Draw rectangle on the image (blue color with thickness 2)
+                    cv2.rectangle(np_image, (x1, y1), (x2, y2), color=(255, 0, 0), thickness=2)
+                    
+                    # Optionally, display the category name at the top of the bounding box
+                    category_name = item.get('category_name', 'Unknown')
+                    #category_name='animal'
+                    cv2.putText(np_image, category_name, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 
+                                fontScale=0.5, color=(255, 0, 0), thickness=1)      
 
 
         if type(data_list) is dict:
             for key, item in data_list.items():
                 print(item)
                 bbox = item['bbox']
-                x_top_left, y_top_left, w, h = bbox
-                
-                # Convert bbox from center (x, y) to top-left (x1, y1) for OpenCV's rectangle function
-                x1 = int(x_top_left)
-                y1 = int(y_top_left)
-                x2 = int(x_top_left + w )
-                y2 = int(y_top_left + h )
-                
-                # Draw rectangle on the image (blue color with thickness 2)
-                cv2.rectangle(np_image, (x1, y1), (x2, y2), color=(255, 0, 0), thickness=2)
-                
-                # Optionally, display the category name at the top of the bounding box
-                category_name = item.get('category_name', 'Unknown')
-                category_name='animal'
-                cv2.putText(np_image, category_name, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 
-                            fontScale=0.5, color=(255, 0, 0), thickness=1)   
+                if len (bbox)==4:
+
+                    x_top_left, y_top_left, w, h = bbox
+                    
+                    # Convert bbox from center (x, y) to top-left (x1, y1) for OpenCV's rectangle function
+                    x1 = int(x_top_left)
+                    y1 = int(y_top_left)
+                    x2 = int(x_top_left + w )
+                    y2 = int(y_top_left + h )
+                    
+                    # Draw rectangle on the image (blue color with thickness 2)
+                    cv2.rectangle(np_image, (x1, y1), (x2, y2), color=(255, 0, 0), thickness=2)
+                    
+                    # Optionally, display the category name at the top of the bounding box
+                    category_name = item.get('category_name', 'Unknown')
+                    #category_name='animal'
+                    cv2.putText(np_image, category_name, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 
+                                fontScale=0.5, color=(255, 0, 0), thickness=1)   
 
         return np_image
 
-    def draw_one_id_on_image(self,image, bbox, image_id, color,conf='0',thickness=10):
+    def draw_one_id_on_image(self,image, bbox, image_id, color,conf='0',class_name='',thickness=10):
         """
         Draw a bounding box with a label on the image.
         Args:
@@ -169,7 +173,7 @@ class visual_image():
         font = cv2.FONT_HERSHEY_SIMPLEX
         font_scale = 2
         font_thickness = 10
-        text = f'ID: {image_id} ; conf: {conf:.2f}'
+        text = f'{class_name}: {image_id} ; conf: {conf:.2f}'
         
         # Calculate text size and position
         text_size = cv2.getTextSize(text, font, font_scale, font_thickness)[0]
@@ -193,11 +197,23 @@ class visual_image():
             '''
             if unique in dict_inside: 
                 item = dict_inside[unique]
+                category_name = item.get('category_name', 'Unknown')
+                bbox = item['bbox']
+                x_top_left, y_top_left, w, h = bbox
+                
+                # Convert bbox from center (x, y) to top-left (x1, y1) for OpenCV's rectangle function
+                x1 = int(x_top_left)
+                y1 = int(y_top_left)
+                x2 = int(x_top_left + w )
+                y2 = int(y_top_left + h )
                 if item['visible']==True:
-                    out_img=self.draw_one_id_on_image(np_image, item['bbox'], item['image_id'], item['color'],item['score'])
+                    out_img=self.draw_one_id_on_image(np_image, item['bbox'], item['image_id'], item['color'],item['score'],category_name)
+                    # out_img=cv2.putText(out_img, category_name, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 
+                    #             fontScale=0.5, color=(255, 0, 0), thickness=1)   
                 elif item['visible']==False:
-                    out_img=self.draw_one_id_on_image(np_image, item['bbox'], ' ' , (211, 211, 211),item['score'])
-
+                    out_img=self.draw_one_id_on_image(np_image, item['bbox'], ' ' , (128, 128, 128),item['score'])
+                    # out_img=cv2.putText(out_img, category_name, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 
+                    #             fontScale=0.5, color=(255, 0, 0), thickness=1)   
 
 
         return out_img
@@ -238,17 +254,17 @@ class visual_image():
 
                 color_id=dict_inside[value]['color']
                 box=yolo_output[0].boxes.xywh.cpu().numpy()[dummy]
-
-                np_img=self.visualize_shapely_polygon_on_image(np_img, Polygon(yolo_output[0].masks.xy[dummy]),color_id,5)
+                #color_id=(128,128,128)
+                np_img=self.visualize_shapely_polygon_on_image(np_img, Polygon(yolo_output[0].masks.xy[dummy]),color=color_id,thickness=5)
                 np_img=self.draw_bounding_boxes_on_image(np_img,[box],color_id,1)
                 box=convert_process().convert_center_to_topleft(box[0],box[1],box[2],box[3])
                 np_img=self.draw_one_id_on_image(np_img,box,value,color_id,5)
             if value==0:
 
-                color_id=(0,0,0)
+                color_id=(128,128,128)
                 box=yolo_output[0].boxes.xywh.cpu().numpy()[dummy]
 
-                np_img=self.visualize_shapely_polygon_on_image(np_img, Polygon(yolo_output[0].masks.xy[dummy]),color_id,5)
+                np_img=self.visualize_shapely_polygon_on_image(np_img, Polygon(yolo_output[0].masks.xy[dummy]),color=color_id,thickness=5)
                 np_img=self.draw_bounding_boxes_on_image(np_img,[box],color_id,1)
                 box=convert_process().convert_center_to_topleft(box[0],box[1],box[2],box[3])
                 np_img=self.draw_one_id_on_image(np_img,box,value,color_id,5)                
@@ -258,6 +274,7 @@ class visual_image():
             value=tracking_list[idx]
             #color_id=find_color_by_image_id(dict_inside,value) #backup
             color_id=dict_inside[value]['color']
+            #color_id=(128,128,128)
             np_img=self.visualize_points_on_image(np_img,[point],color_id,radius=8)
 
         #print("np_img************",np_img.shape)

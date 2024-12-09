@@ -50,4 +50,16 @@ class remove_intrack():
 
 
         return removed_featurecpu,removed_status,removed_id_intrack,removed_history
+    def apply_remove_first_step(self,id_list_need_remove,featurecpu,id_list_intrack,history):
+        indices_to_remove = [index for index, value in enumerate(id_list_intrack) if value in id_list_need_remove]
+        removed_featurecpu = [value for index, value in enumerate(featurecpu) if index not in indices_to_remove]
+        removed_id_intrack = [value for index, value in enumerate(id_list_intrack) if index not in indices_to_remove]
+        removed_history = [value for index, value in enumerate(history) if index not in indices_to_remove]
+        
+
+
+        return removed_featurecpu,removed_id_intrack,removed_history
     
+    def remove_key_in_dict(self,dict_inside,list_key):
+        filtered_dict = {key: value for key, value in dict_inside.items() if key not in list_key}
+        return filtered_dict 

@@ -4,7 +4,7 @@ from wildtracker.utils.update import update_bounding_box
 def reconstruct_process(np_image,dict_coco_annotations,cur_feature,tracking_list):
     #dict_inside=dict_coco_annotations
     unique_values = set(tracking_list)
-    print("unique_values in reconstruct ",unique_values)
+    #print("unique_values in reconstruct ",unique_values)
     for unique in unique_values:
         indices_of_unique = np.where(np.array(tracking_list) == unique)[0].tolist()
         
@@ -48,7 +48,7 @@ def reconstruct_process(np_image,dict_coco_annotations,cur_feature,tracking_list
 
         if unique in dict_coco_annotations:
             item = dict_coco_annotations[unique]
-            print("itemmmm ahahaha",item)
+            #print("itemmmm ahahaha",item)
             box_ori=item['ori_bbox']
             #box_previous=find_box_by_id(list_boxes_complete_step_t,unique)
             center_t0=item['ori_center_points']

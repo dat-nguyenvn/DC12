@@ -37,7 +37,7 @@ class matching_module():
         
         # Get the number of unique values
         number_unique_id = len(unique_values)
-        print("number_unique_id",number_unique_id)
+        #print("number_unique_id",number_unique_id)
 
 
         #poa_table is list of list , each row is list belong to a mask
@@ -67,6 +67,8 @@ class matching_module():
                         poa_value, count= self.poa(point_of_one_id,mask)
                         #print("poa_value",poa_value)
                         poa_per_mask.append(poa_value)
+                        #TODO: kill point not in mask 
+                        #need_remove(indices_of_unique)
 
                     #print("poa_per_mask",poa_per_mask)
                     poa_table.append(poa_per_mask)

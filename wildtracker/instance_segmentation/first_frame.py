@@ -17,6 +17,7 @@ from wildtracker.utils.crop import crop_bbox
 from wildtracker.points_selection.apply_method import apply_processing
 from wildtracker.visualization.visual import visual_image
 from wildtracker.utils.convert import convert_process,convert_list_dict_to_dict
+from wildtracker.utils.utils import generate_high_contrast_colors
 
 def init_detection(img,model_name):
 
@@ -29,7 +30,7 @@ def init_detection(img,model_name):
     detection_model_seg = AutoDetectionModel.from_pretrained(
     model_type='yolov8',
     model_path=yolov8_seg_model_path,
-    confidence_threshold=0.5,
+    confidence_threshold=0.1,
     device="cuda", # or 'cuda:0'
     )
 
@@ -46,6 +47,26 @@ def init_detection(img,model_name):
     rgbarray=np.array(result.image)
     object_prediction_list = result.object_prediction_list
     return result
+
+def filter_init_detection(result):
+    object_prediction_list = result.object_prediction_list
+    print("aaaaaaaaaaasss",result)
+
+    # filtered_detections = []
+    
+    # for detection in object_prediction_list:
+    #     # Check if bounding box or segmentation mask exists for each detection
+    #     # Assuming 'bbox' represents the bounding box and 'mask' represents the segmentation mask
+    #     bbox = detection.get('bbox', None)
+    #     #mask = detection.get('mask', None)
+        
+    #     # You can adjust the conditions based on your output format
+    #     if len(bbox) ==4:
+    #         # Only append detections with both bbox and mask
+    #         filtered_detections.append(detection)
+    
+    return None
+    
 
 
 def process_first_frame(result):
@@ -90,7 +111,8 @@ def process_first_frame(result):
         # plt.imshow(show_image)
         # plt.show()
         # end slide
-        if len(points_one_object)>0:
+        print("aasss!!!!!!",ob1.bbox)
+        if len(points_one_object)>0 :
             point_sample=points_one_object
             #print("point_sample",point_sample)
             id_list_intrack += [id]*len(point_sample)
@@ -191,12 +213,13 @@ def process_boxes_complete_step_init(list_dict_info,tracking_list,points):
     print("list_dict_info",list_dict_info)
     
     for idx,value in enumerate(list_dict_info):
+        
 
         value['image_id']=idx+1
         value['bbox']=value['bbox']
         value['ori_center_points']=id_center_dict[idx+1]
         value['ori_bbox']=value['bbox']
-        value['color']=(randint(0, 255),randint(0, 255),randint(0, 255))
+        value['color']=generate_high_contrast_colors()
         value['lastest_point']=None
         value['disappear_step']=None
         value['points_step_t']=point_of_id_dict[idx+1]
@@ -206,8 +229,9 @@ def process_boxes_complete_step_init(list_dict_info,tracking_list,points):
         if value['score']>0.8:
             value['visible']=True
     
+    #print("len(list_dict_info)",len(list_dict_info))
     list_dict_info=convert_list_dict_to_dict(list_dict_info)
-
+    #print(list_dict_info.keys())
     #print("list_dict_info aaaaaaaaaaa",list_dict_info[2].keys())
     
     

@@ -129,3 +129,24 @@ def calculate_modified_iou(box1, box2):
     # Calculate the Modified IoU
     modified_iou = inter_area / min_area
     return modified_iou
+
+
+def generate_high_contrast_colors():
+    """
+    Generate `n_colors` BGR colors with high contrast against gray.
+    """
+    gray_value = np.array([128, 128, 128])  # Mid-gray in BGR
+
+    while True:
+        # Generate a random BGR color
+        color_gen = np.random.randint(0, 256, size=3)
+        
+        # Check contrast against gray using Euclidean distance
+        contrast = np.linalg.norm(color_gen - gray_value)
+        
+        # Set a contrast threshold (e.g., >100)
+        if contrast > 100:
+            return (int(color_gen[0]), int(color_gen[1]),int(color_gen[2]))
+            
+    
+    

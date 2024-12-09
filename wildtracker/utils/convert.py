@@ -173,7 +173,8 @@ class convert_process():
 def convert_list_dict_to_dict(list_dict_info):
     end_dict={}
     for idx,value in enumerate(list_dict_info):
+        #if len(value['bbox'])==4:
         end_dict[idx+1]=value
 
-    print("keyssssssssss",end_dict.keys())
+    #print("keyssssssssss",end_dict.keys())
     return end_dict

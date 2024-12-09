@@ -1460,14 +1460,74 @@ class check_live_info():
                 idx_list_need_remove.append(int(index))
 
         return idx_list_need_remove
+    def check_main_dict_by_id(self,dict_inside):
+        remove_id_list=[]
+        for key, value in dict_inside.items():
+            #print(f"Key: {key}, Value: {value}")
+            if len(value['bbox'])!=4:
+                remove_id_list.append(key)
+
+
+
+
+        return remove_id_list
 
     
-    def check_and_find_remove_list(self,sta,history_point,threshold_point_not_inmask):
+    def check_and_find_remove_list(self,sta,history_point,threshold_point_not_inmask,cur_point,ID_list,dict_inside):
         idx_list_need_remove=[]
         idx_list_need_remove=self.check_status(sta,idx_list_need_remove)
         idx_list_need_remove=self.check_history(history_point,idx_list_need_remove,threshold_point_not_inmask)
+        out_point=self.check_point_not_in_bbox(cur_point,ID_list,dict_inside)
+        idx_list_need_remove.extend(out_point)
         return idx_list_need_remove
     
+    def check_point_not_in_bbox(self,cur_point, ID_list, dict_inside):
+
+        """
+        Find indices of points that are not inside their respective bounding boxes.
+
+        Parameters:
+        - curFeatures (numpy.ndarray): A (n, 2) array containing (x, y) coordinates of points.
+        - ID_list (list): A list of point IDs corresponding to curFeatures.
+        - dict_inside (dict): A dictionary where keys are IDs and values contain a 'bbox' key with bounding box data.
+
+        Returns:
+        - list: Indices of points that are outside their respective bounding boxes.
+        """
+        if len(cur_point) != len(ID_list):
+            raise ValueError("Length of curFeatures and ID_list must match.")
+        
+        outside_indices = []
+    
+
+        for idx, (point, _id) in enumerate(zip(cur_point, ID_list)):
+            # if ID not in dict_inside:
+            #     # If the ID has no bounding box, consider it invalid.
+            #     outside_indices.append(idx)
+            #     continue
+            #print("dict_inside[ID]['bbox']",dict_inside[_id]['bbox'])
+
+            #print(f"Index: {idx}, Point: {point}, ID: {_id}")
+            #print()
+            bbox = dict_inside[_id]['bbox']
+            # if not bbox:
+            #     # If 'bbox' key is missing or invalid, consider the point invalid.
+            #     outside_indices.append(idx)
+            #     continue
+
+            x, y = point
+            x_topleft, y_topleft, w, h = bbox
+            x_bottomright = x_topleft + w
+            y_bottomright = y_topleft + h
+
+            # Check if the point is outside the bounding box.
+            if not (x_topleft <= x <= x_bottomright and y_topleft <= y <= y_bottomright):
+                outside_indices.append(idx)
+        #print("outside_indices",outside_indices)
+        return outside_indices
+
+
+
 # class remove_intrack():
 #     def remove_duplicates(self,lst):
 #         """
