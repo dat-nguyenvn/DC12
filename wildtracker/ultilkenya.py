@@ -164,6 +164,7 @@ from wildtracker.generate_data_dynamic_detect import *
 from wildtracker.utils.crop import crop_bbox
 from wildtracker.utils.convert import convert_process
 
+from wildtracker.utils.utils import compute_centroid,generate_high_contrast_colors,is_not_box_at_edge
 
 # def crop_bbox(image_np, bbox):
 #     """
@@ -1526,6 +1527,48 @@ class check_live_info():
         #print("outside_indices",outside_indices)
         return outside_indices
 
+    def find_point_not_in_mask(self,tracking_list,curFeaturescpu,match_box_id,yolo_detector,center_window,threshold_box_conf=0.8):
+        remove_list=[]
+        points_list=[tuple(map(int, row)) for row in curFeaturescpu.tolist()]
+        unique_values = set(tracking_list)
+        for idx,value in enumerate(match_box_id):
+            if value!=0 and yolo_detector[0].boxes.conf.cpu().numpy()[idx]>threshold_box_conf:
+                box_yolo=yolo_detector[0].boxes.xywh.cpu().numpy()[idx]
+                if is_not_box_at_edge(box_yolo):
+                    #idx
+                    mask = Polygon(yolo_detector[0].masks.xy[idx])
+                    mask=convert_process().convert_polygon_window_to_full_frame(mask,center_window)
+                    for index,p in enumerate (points_list):
+                        shapely_point = Point(p)
+                        if mask.contains(shapely_point) and tracking_list[index]!=value:
+                            remove_list.append(index)
+              
+
+        return remove_list
+
+
+def draw_window_and_center(image, center, window_size=640):
+    # Convert the image to a copy to avoid modifying the original
+    img_copy = image.copy()
+
+    # Calculate the top-left corner of the window based on the center
+    x_center, y_center = center
+    half_window_size = window_size // 2
+    
+    top_left_x = x_center - half_window_size
+    top_left_y = y_center - half_window_size
+
+    # Bottom-right corner of the window
+    bottom_right_x = x_center + half_window_size
+    bottom_right_y = y_center + half_window_size
+
+    # Draw the center (as a red dot)
+    cv2.circle(img_copy, (x_center, y_center), 5, (0, 0, 255), -1)  # (0, 0, 255) is red in BGR
+
+    # Draw the window (as a green rectangle)
+    cv2.rectangle(img_copy, (top_left_x, top_left_y), (bottom_right_x, bottom_right_y), (0, 255, 0), 2)  # (0, 255, 0) is green
+
+    return img_copy
 
 
 # class remove_intrack():
@@ -1637,21 +1680,33 @@ class check_live_info():
 
 
 
-def iou(box1, box2):
+def iou(box1, box2, format="topleft"):
     """
     Compute the Intersection over Union (IoU) of two bounding boxes.
-    box = [x_center, y_center, w, h]
-    """
-    # Calculate the coordinates of the intersection rectangle
-    x1_min = box1[0] - box1[2] / 2
-    y1_min = box1[1] - box1[3] / 2
-    x1_max = box1[0] + box1[2] / 2
-    y1_max = box1[1] + box1[3] / 2
 
-    x2_min = box2[0] - box2[2] / 2
-    y2_min = box2[1] - box2[3] / 2
-    x2_max = box2[0] + box2[2] / 2
-    y2_max = box2[1] + box2[3] / 2
+    :param box1: List [x, y, w, h], either center-based or top-left format.
+    :param box2: List [x, y, w, h], either center-based or top-left format.
+    :param format: Specify the format of the boxes, "center" or "topleft".
+    :return: IoU value
+    """
+    if format == "center":
+        # Convert from center to top-left format
+        x1_min = box1[0] - box1[2] / 2
+        y1_min = box1[1] - box1[3] / 2
+        x1_max = box1[0] + box1[2] / 2
+        y1_max = box1[1] + box1[3] / 2
+
+        x2_min = box2[0] - box2[2] / 2
+        y2_min = box2[1] - box2[3] / 2
+        x2_max = box2[0] + box2[2] / 2
+        y2_max = box2[1] + box2[3] / 2
+
+    elif format == "topleft":
+        # Use as is for top-left format
+        x1_min, y1_min, x1_max, y1_max = box1[0], box1[1], box1[0] + box1[2], box1[1] + box1[3]
+        x2_min, y2_min, x2_max, y2_max = box2[0], box2[1], box2[0] + box2[2], box2[1] + box2[3]
+    else:
+        raise ValueError("Invalid format. Use 'center' or 'topleft'.")
 
     # Compute the coordinates of the intersection rectangle
     inter_x_min = max(x1_min, x2_min)
@@ -1665,8 +1720,8 @@ def iou(box1, box2):
     intersection_area = inter_width * inter_height
 
     # Compute area of both bounding boxes
-    area1 = box1[2] * box1[3]
-    area2 = box2[2] * box2[3]
+    area1 = (x1_max - x1_min) * (y1_max - y1_min)
+    area2 = (x2_max - x2_min) * (y2_max - y2_min)
 
     # Compute area of union
     union_area = area1 + area2 - intersection_area
@@ -1675,7 +1730,7 @@ def iou(box1, box2):
     return intersection_area / union_area if union_area > 0 else 0
 
 
-def filter_dict_main_overlap_box(bbox_dict, iou_threshold=0.9,iou_threshold_modify=0.9):
+def filter_dict_main_overlap_box(bbox_dict, iou_threshold=0.7,iou_threshold_modify=0.7):
     """
     Filter out items with overlapping bounding boxes with IoU greater than a threshold.
     """
@@ -1729,6 +1784,7 @@ def filter_dict_main_overlap_box(bbox_dict, iou_threshold=0.9,iou_threshold_modi
     return bbox_dict
 
 def calculate_modified_iou(box1, box2):
+    #topleftwh
     # Extract top-left corner and width/height for both boxes
     x1_1, y1_1, w1, h1 = box1  # Box 1
     x1_2, y1_2, w2, h2 = box2  # Box 2
@@ -1915,35 +1971,35 @@ def calculate_modified_iou(box1, box2):
     
 #     return (centroid_x, centroid_y)
 
-# def update_bounding_box(center_points_t0, points_t1, box_t):
-    """
-    Update the bounding box based on points at time step t and t+1.
+# # def update_bounding_box(center_points_t0, points_t1, box_t):
+#     """
+#     Update the bounding box based on points at time step t and t+1.
 
-    Parameters:
-    - points_t: List of points [(x1, y1), (x2, y2), ...] at time t.
-    - points_t1: List of points [(x1, y1), (x2, y2), ...] at time t+1.
-    - box_t: Original bounding box (x_center, y_center, w, h) at time t.
+#     Parameters:
+#     - points_t: List of points [(x1, y1), (x2, y2), ...] at time t.
+#     - points_t1: List of points [(x1, y1), (x2, y2), ...] at time t+1.
+#     - box_t: Original bounding box (x_center, y_center, w, h) at time t.
 
-    Returns:
-    - new_box: Updated bounding box [x_center, y_center, w, h] at time t+1.
-    """
-    # Get original bounding box center and size
-    x_center_t, y_center_t, w, h = box_t
+#     Returns:
+#     - new_box: Updated bounding box [x_center, y_center, w, h] at time t+1.
+#     """
+#     # Get original bounding box center and size
+#     x_center_t, y_center_t, w, h = box_t
     
-    # Compute centroids of points at time t and time t+1
-    centroid_t = center_points_t0
-    centroid_t1 = compute_centroid(points_t1)
+#     # Compute centroids of points at time t and time t+1
+#     centroid_t = center_points_t0
+#     centroid_t1 = compute_centroid(points_t1)
     
-    # Compute shift in centroid position
-    shift_x = centroid_t1[0] - centroid_t[0]
-    shift_y = centroid_t1[1] - centroid_t[1]
+#     # Compute shift in centroid position
+#     shift_x = centroid_t1[0] - centroid_t[0]
+#     shift_y = centroid_t1[1] - centroid_t[1]
     
-    # Update bounding box center with the shift
-    new_x_center = x_center_t + shift_x
-    new_y_center = y_center_t + shift_y
+#     # Update bounding box center with the shift
+#     new_x_center = x_center_t + shift_x
+#     new_y_center = y_center_t + shift_y
     
-    # Return the new bounding box with the same width and height
-    return [new_x_center, new_y_center, w, h],(shift_x,shift_y)
+#     # Return the new bounding box with the same width and height
+#     return [new_x_center, new_y_center, w, h],(shift_x,shift_y)
     
 # def reconstruct_process(np_image,dict_coco_annotations,cur_feature,tracking_list):
 #     #dict_inside=dict_coco_annotations

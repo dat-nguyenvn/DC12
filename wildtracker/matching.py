@@ -6,7 +6,7 @@ from random import randint
 
 
 from wildtracker.utils.convert import convert_process
-
+from wildtracker.ultilkenya import iou
 
 
 
@@ -77,6 +77,70 @@ class matching_module():
             # poa_table.append(mask_poa)
 
         return poa_table
+
+    def iou_table(self,dict_inside,points,yolo_detector,tracking_list,center_window):
+        #poa table: row ~ mask /
+        # each row : value poa of group ID
+
+        unique_values = set(tracking_list)
+        
+        # Get the number of unique values
+        number_unique_id = len(unique_values)
+        #print("number_unique_id",number_unique_id)
+
+
+        #poa_table is list of list , each row is list belong to a mask
+        iou_table=[]
+        for r in yolo_detector:
+            # TODO something: visula polygon detected on cropped frame
+            # orig_img=r.orig_img
+            # print("type orig_img",type(orig_img))
+            # point_list_of_tuples = [tuple(map(int, row)) for row in points]
+            # print("point_list_of_tuples",point_list_of_tuples)
+            # show_image=visualize_shapely_polygon_on_image(orig_img,point_list_of_tuples)
+            # plt.imshow(show_image)
+            # plt.show()
+
+            if len(r.masks.xy)>0:
+                for box_count in range (r.boxes.xyxy.cpu().numpy().shape[0]):
+                    #mask = Polygon(r.masks.xy[mask_count])
+                    box_yolo=yolo_detector[0].boxes.xywh.cpu().numpy()[box_count]
+                    box_yolo=convert_process().convert_xywh_to_top_left(box_yolo)
+                    box_yolo=convert_process().convert_bounding_boxes_to_big_frame(box_yolo.reshape(1, 4),center_window,(640,640))[0]
+
+
+
+                    iou_per_box=[]
+                    #mask to shapely
+
+                    for unique in unique_values:
+                        indices_of_unique = np.where(np.array(tracking_list) == unique)[0].tolist()
+                        point_of_one_id=[tuple(points[i]) for i in indices_of_unique]
+                        pre_box=dict_inside[unique]['bbox']
+                        iou_value=iou(pre_box,box_yolo) 
+
+                        
+                        #print("poa_value",poa_value)
+                        iou_per_box.append(iou_value)
+     
+
+                    #print("poa_per_mask",poa_per_mask)
+                    iou_table.append(iou_per_box)
+
+            #     mask_poa.append(poa)
+            # poa_table.append(mask_poa)
+
+        return iou_table
+    
+
+    def matching3 (self,tracking_list,iou_table,match_box_id,iou_thresshold=0.7):
+        #match iou thresshold
+        unique_values = list(set(tracking_list))
+        number_bbox=len(match_box_id)
+
+
+
+        return match_box_id
     
     def matching1 (self,tracking_list,poa_table): # First association
         #poa_table=self.poa_table
@@ -92,12 +156,26 @@ class matching_module():
             #  la tim vi tri dau tien cua gia tri max, \
             # neu co 2 index = nhau co loi nhe
             #todo check heare
-            if poa_per_mask[best_match_index]>=0.2 : 
+            if poa_per_mask[best_match_index]>=0.5 : 
                 match_box_id[idx_mask]=unique_values[best_match_index]
 
 
         print("match_box_id",match_box_id)
         return match_box_id
+    
+    def accumulate_lists(self,list1, list2):
+        """
+        Add values at corresponding positions in two lists of lists.
+        
+        :param list1: First list of lists.
+        :param list2: Second list of lists.
+        :return: A new list of lists with summed values.
+        """
+        if len(list1) != len(list2) or any(len(row1) != len(row2) for row1, row2 in zip(list1, list2)):
+            raise ValueError("Both lists must have the same dimensions.")
+        
+        # Add corresponding elements
+        return [[v1 + v2 for v1, v2 in zip(row1, row2)] for row1, row2 in zip(list1, list2)]
 
     def filter_poa_table (self,tracking_list,poa_table): # remove points in belong to same object
         #poa_table=self.poa_table
@@ -166,6 +244,9 @@ class matching_module():
 
 
         return match_box_id
+    
+
+
 
 def calculate_average_distance(points, center_box):
     """

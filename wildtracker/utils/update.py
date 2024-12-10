@@ -6,8 +6,8 @@ from random import randint
 
 
 from wildtracker.utils.convert import convert_process
-from wildtracker.utils.utils import compute_centroid,generate_high_contrast_colors
-
+from wildtracker.utils.utils import compute_centroid,generate_high_contrast_colors,is_not_box_at_edge
+from wildtracker.instance_segmentation.first_frame import dict_id_center
 
 
 class update():
@@ -134,11 +134,15 @@ class update():
             if value!=0 and yolo_detector[0].boxes.conf.cpu().numpy()[idx]>threshold_box_conf:
                 print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
                 box_yolo=yolo_detector[0].boxes.xywh.cpu().numpy()[idx]
-                box_yolo=convert_process().convert_xywh_to_top_left(box_yolo)
-                box_yolo=convert_process().convert_bounding_boxes_to_big_frame(box_yolo.reshape(1, 4),center_window,(640,640))[0]
-                dict_inside[value]['bbox']=box_yolo
-                dict_inside[value]['ori_bbox']=box_yolo
-                dict_inside[value]['ori_center_points']=self.update_points_group_center(value,tracking_list,points)
+                if is_not_box_at_edge(box_yolo):
+                    box_yolo=convert_process().convert_xywh_to_top_left(box_yolo)
+                    box_yolo=convert_process().convert_bounding_boxes_to_big_frame(box_yolo.reshape(1, 4),center_window,(640,640))[0]
+                    dict_inside[value]['bbox']=box_yolo
+                    dict_inside[value]['ori_bbox']=box_yolo
+                    id_center_dict,point_of_id_dict=dict_id_center(tracking_list,points)
+
+                    #dict_inside[value]['ori_center_points']=self.update_points_group_center(value,tracking_list,points)
+                    dict_inside[value]['ori_center_points']=id_center_dict[value]
         
 
         return dict_inside

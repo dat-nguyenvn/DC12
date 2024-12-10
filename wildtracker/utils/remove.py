@@ -48,6 +48,8 @@ class remove_intrack():
                 removed_history=self.remove_history_old_point(history,idx_list_need_remove)
                 removed_id_intrack=self.remove_id_list_intrack(id_list_intrack,idx_list_need_remove)
 
+                #print()
+
 
         return removed_featurecpu,removed_status,removed_id_intrack,removed_history
     def apply_remove_first_step(self,id_list_need_remove,featurecpu,id_list_intrack,history):

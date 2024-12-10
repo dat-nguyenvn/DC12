@@ -140,7 +140,7 @@ def process_first_frame(result):
     return trackpoint_LK,id_list_intrack,history_points_tracked_list,dict_filtered,show_image
 
 
-def dict_id_center(tracking_list, points):
+def dict_id_center(tracking_list, in_points):
     """
     Calculate the centers of points grouped by their tracking IDs.
 
@@ -158,8 +158,11 @@ def dict_id_center(tracking_list, points):
     # Iterate over unique IDs in the tracking list
     unique_ids = set(tracking_list)
     for id_ in unique_ids:
+        print("len points",len(in_points))
+        print("len(tracking_list)",len(tracking_list))
+
         # Find all points corresponding to the current ID
-        id_points = [points[i] for i in range(len(tracking_list)) if tracking_list[i] == id_]
+        id_points = [in_points[i] for i in range(len(tracking_list)) if tracking_list[i] == id_]
         
         # Calculate the mean (center) of the points
         center = np.mean(id_points, axis=0)
@@ -167,7 +170,7 @@ def dict_id_center(tracking_list, points):
         # Store the center in the dictionary
         centers_dict[id_] = tuple(center)
         point_of_id_dict[id_]= id_points
-        print("id_points", id_points)
+        #print("id_points", id_points)
 
     return centers_dict,point_of_id_dict
 

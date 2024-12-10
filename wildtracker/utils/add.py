@@ -54,7 +54,7 @@ class add_points():
         return cropped_image,mask,x_min,y_min,x_center,y_center,width,height
 
 
-    def apply_add_process_new_id(self,rgb_image,dict_inside,matched_box,yolo_detector,centerwindow,featurecpu,trackinglist,history,thesshold_area_of_animal,threshold_conf=0.3):
+    def apply_add_process_new_id(self,rgb_image,dict_inside,matched_box,yolo_detector,centerwindow,featurecpu,trackinglist,history,thesshold_area_of_animal,threshold_conf=0.7):
         
         for idx,value in enumerate(matched_box):
             if value==0 and yolo_detector[0].boxes.conf.cpu().numpy()[idx]>threshold_conf :
@@ -91,7 +91,7 @@ class add_points():
 
                     image_np,polygon,minx,miny,xcen,ycen,wid,hei=self.getnumpyimage_from_yolo(yolo_detector,idx)
                     
-                    print("dictid_need_increase_point[value]^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",dictid_need_increase_point[value])
+                    #print("dictid_need_increase_point[value]^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",dictid_need_increase_point[value])
                     five_points=harris_selection_method().filter_some_points(image_np,polygon,minx,miny,number_point_per_animal=dictid_need_increase_point[value])
                     if len(five_points)>0:
                         five_points_in_window=convert_process().convert_points_box_to_full_frame(five_points,minx,miny)

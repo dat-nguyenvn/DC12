@@ -41,7 +41,7 @@ from wildtracker.matching import matching_module,calculate_average_distance,uniq
 from wildtracker.reconstruct import reconstruct_process
 from wildtracker.utils.utils import compute_centroid, check_box_overlap,need_add_id_and_point,need_increase_point_for_id
 from wildtracker.videosource import rtsp_stream,input_folder
-
+from wildtracker.ultilkenya import filter_dict_main_overlap_box,draw_window_and_center
 #from jetson_utils import videoSource, videoOutput
 #import jetson.utils
 
@@ -91,7 +91,7 @@ inputsource= input_folder(args.input_fordel_path)
 
 
 
-h,w,c=inputsource.frame_size()
+w,h,c=inputsource.frame_size()
 im=inputsource.get_RGBframe_numpy()
 rgb_image=im
 
@@ -110,6 +110,8 @@ show_image=visual_image().draw_info_from_main_dict(show_image,list_dict_info_mai
 
 #show_image=visual_image().visual_bounding_box_of_dict(list_dict_info_main,show_image,id_list_intrack)
  
+print("h",h,"w",w)
+
 plt.imshow(show_image)
 plt.show()
 
@@ -200,10 +202,14 @@ while True:
     idx_list_need_remove=list(set(idx_list_need_remove_status + row_at_the_edge))
     if len(idx_list_need_remove)>0:
         curFeatures, status,id_list_intrack,history_point_inmask=remove_intrack().apply_remove(idx_list_need_remove,curFeatures,status,id_list_intrack,history_point_inmask)
+        print("1111curFeatures",curFeatures.cpu().shape)
+        print("1111id_list_intrack",len(id_list_intrack))
+
+        
         with vpi.Backend.CUDA:
             optflow = vpi.OpticalFlowPyrLK(frame, curFeatures, 5)
 
-    #list_dict_info_main=filter_dict_main_overlap_box(list_dict_info_main)
+    list_dict_info_main=filter_dict_main_overlap_box(list_dict_info_main)
     list_dict_info_main=reconstruct_process(show_image,list_dict_info_main,curFeatures.cpu(),id_list_intrack)
 
     #list_dict_info_main=reconstruct_process(show_image,list_dict_info_main,curFeatures.cpu(),id_list_intrack)
@@ -212,12 +218,17 @@ while True:
     # plt.imshow(show_image)
     # plt.show()
 
-    center_crop,window_color=strategy_pick_window(idFrame,center_window_list,border_center_point,salient_center_point,list_of_tuples)
+    center_crop,window_color=strategy_pick_window(idFrame,center_window_list,border_center_point,salient_center_point,[tuple(map(int, row)) for row in curFeatures.cpu().tolist()])
     #print("cvFrame",cvFrame.shape)
     
     window_detection=crop_window(cvFrame,center_crop)
+    # abc=draw_window_and_center(cvFrame,center_crop)
+
+    # plt.imshow(abc)
+    # plt.show()
+
     #print("window_detection", window_detection.shape)
-    out_detector=model.predict(window_detection,show_boxes=True, save_crop=False ,show_labels=False,show_conf=False,save=False, classes=[20,22,23],conf=0.3,imgsz=(640,640))
+    out_detector=model.predict(window_detection,show_boxes=True, save_crop=False ,show_labels=False,show_conf=False,save=False, classes=[20,22,23],conf=0.1,imgsz=(640,640))
 
     history_point_inmask = [x + 1 for x in history_point_inmask]
     #print("out_detector[0]",out_detector[0])
@@ -227,17 +238,23 @@ while True:
         #print("out_detector[0]", out_detector[0].boxes.xywh.cpu().numpy().shape)
         history_point_inmask=update().history_point_mask(points=curFeatures.cpu(),history_points_in_mask=history_point_inmask,yolo_detector=out_detector,center_window=center_crop)
         poatabel=matching_module().poa_table(curFeatures.cpu(),out_detector,id_list_intrack,center_crop)
-        
+        ioutable=matching_module().iou_table(list_dict_info_main,curFeatures.cpu(),out_detector,id_list_intrack,center_crop)
+        ioutable=matching_module().accumulate_lists(poatabel,ioutable)
 
-        box_id=matching_module().matching1(id_list_intrack,poatabel)
-        #list_dict_info_main=update().step_update_detected_bbox_to_main_dict(list_dict_info_main,out_detector,id_list_intrack,list_of_tuples,box_id,center_crop)
+        #box_id=matching_module().matching1(id_list_intrack,poatabel)
+        box_id=matching_module().matching1(id_list_intrack,ioutable)
+        
         box_id2=matching_module().matching2(box_id,id_list_intrack,out_detector,center_crop,curFeatures.cpu(),threshold_ecl_dis_match=ecl_dis_match)
+        print("2222curFeatures",curFeatures.cpu().shape)
+        print("2222id_list_intrack",len(id_list_intrack))
         #print("outttttttttt .boxes.conf.cpu().numpy()[idx]",out_detector[0].boxes.conf.cpu().numpy().shape)
 
 
-        list_dict_info_main=update().step_accumulate(list_dict_info_main,out_detector,id_list_intrack,list_of_tuples,box_id2,center_crop)
+        list_dict_info_main=update().step_accumulate(list_dict_info_main,out_detector,id_list_intrack,[tuple(map(int, row)) for row in curFeatures.cpu().tolist()],box_id2,center_crop)
         # list_dict_info_main=update().update_bounding_box_based_on_eq4(list_dict_info_main,out_detector,id_list_intrack,list_of_tuples,box_id2,center_crop)
-
+        
+        print("333curFeatures",curFeatures.cpu().shape)
+        print("333id_list_intrack",len(id_list_intrack))
         save_window=visual_image().draw_all_on_window(out_detector,box_id2,list_dict_info_main,curFeatures.cpu(),center_crop,id_list_intrack)
         # plt.imshow(save_window)
         # plt.show()
@@ -247,13 +264,15 @@ while True:
         file_path = os.path.join(save_window_path, name)
         plt.imsave(file_path, save_window)
         file_path_txt = os.path.join(save_window_path, name_txt)
-        save_2d_list_to_txt(poatabel,file_path_txt)
+        save_2d_list_to_txt(ioutable,file_path_txt)
 
 
-        idx_list_need_remove=matching_module().filter_poa_table(id_list_intrack,poatabel) # remove points in belong to same object
+        idx_list_need_remove=check_live_info().find_point_not_in_mask(id_list_intrack,curFeatures.cpu(),box_id2,out_detector,center_crop) # remove points in belong to same object
 
         if len(idx_list_need_remove)>0:
             curFeatures, status,id_list_intrack,history_point_inmask=remove_intrack().apply_remove(idx_list_need_remove,curFeatures,status,id_list_intrack,history_point_inmask)
+            print("444curFeatures",curFeatures.cpu().shape)
+            print("444id_list_intrack",len(id_list_intrack))
             with vpi.Backend.CUDA:
                 optflow = vpi.OpticalFlowPyrLK(frame, curFeatures, 5)
 
@@ -261,12 +280,16 @@ while True:
         if len(dict_id_need_increase_point)>0:
             list_dict_info_main,curFeatures,id_list_intrack,history_point_inmask=add_points().apply_add_process_need_more_points(dict_id_need_increase_point,show_image,list_dict_info_main,box_id2,out_detector,center_crop,curFeatures.cpu(),id_list_intrack,history_point_inmask)
             
-            
+            print("555curFeatures",curFeatures.shape)
+            print("555id_list_intrack",len(id_list_intrack))
+
             with vpi.Backend.CUDA:
                 curFeatures=vpi.asarray(curFeatures)
                 optflow = vpi.OpticalFlowPyrLK(frame, curFeatures, 5)
 
-
+        list_dict_info_main=update().step_update_detected_bbox_to_main_dict(list_dict_info_main,out_detector,id_list_intrack,[tuple(map(int, row)) for row in curFeatures.cpu().tolist()],box_id,center_crop)
+        print("666curFeatures",curFeatures.cpu().shape)
+        print("666id_list_intrack",len(id_list_intrack))
     if need_add_id_and_point(box_id2):
         list_dict_info_main,curFeatures,id_list_intrack,history_point_inmask=add_points().apply_add_process_new_id(show_image,list_dict_info_main,box_id2,out_detector,center_crop,curFeatures.cpu(),id_list_intrack,history_point_inmask,thesshold_area_each_animal)
         
@@ -275,6 +298,7 @@ while True:
         # print("id_list_intrack",id_list_intrack)
         # print("set track ing list ",set(id_list_intrack))
         
+
         with vpi.Backend.CUDA:
             curFeatures=vpi.asarray(curFeatures)
             optflow = vpi.OpticalFlowPyrLK(frame, curFeatures, 5)
