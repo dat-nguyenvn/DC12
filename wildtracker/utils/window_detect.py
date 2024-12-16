@@ -87,20 +87,24 @@ class generate_centers():
 def strategy_pick_window(step,list_all_center,border_centers,salient_centers,current_track_points ):
     big_list=[border_centers,salient_centers,current_track_points]
     current_list = big_list[step % 3]
+    try:
+        if step%3==0: #border
+            center=current_list[step // 3 % len(current_list)]
+            win_color=(255, 255, 0)
+            print("000 center",center)
+        elif step%3==1:  #salient
+            center=current_list[step // 3 % len(current_list)]
+            win_color=(0, 255, 0)
+            print("111 center",center)
+        else : #step%3==2:
+            
+            center =random.choice(current_track_points)
+            win_color=(255, 0, 0)
+            print("strategy center",center)
 
-    if step%3==0: #border
-        center=current_list[step // 3 % len(current_list)]
-        win_color=(255, 255, 0)
-        print("000 center",center)
-    elif step%3==1:  #salient
-        center=current_list[step // 3 % len(current_list)]
-        win_color=(0, 255, 0)
-        print("111 center",center)
-    else : #step%3==2:
-        
-        center =random.choice(current_track_points)
+    except:
+        center=random.choice(current_track_points)
         win_color=(255, 0, 0)
-        print("strategy center",center)
 
     #center=random.choice(list_all_center)
 

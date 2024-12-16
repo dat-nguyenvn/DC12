@@ -96,6 +96,7 @@ class input_folder(videosourceprovider):
     def frame_size(self):
         self.index =0
         frame=self.get_frame()
+        self.index =0
         height, width, channels = frame.shape
         #channels=3
         return width, height,channels 
