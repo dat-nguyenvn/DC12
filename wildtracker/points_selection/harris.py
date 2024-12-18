@@ -6,7 +6,7 @@ from wildtracker.points_selection.base_selection import selected_point_method
 
 class harris_selection_method(selected_point_method):
     def process(self,cropped_image_numpy,blockSize=5, ksize=3, k=0.04, threshold=0.2):
-
+        print("cropped_image_numpy",cropped_image_numpy.shape)
         gray_image = cv2.cvtColor(cropped_image_numpy, cv2.COLOR_BGR2GRAY)
 
         # Convert to float32 for cornerHarris

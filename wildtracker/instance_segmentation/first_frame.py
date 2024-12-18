@@ -33,7 +33,8 @@ def init_detection(img,model_name):
     confidence_threshold=0.1,
     device="cuda", # or 'cuda:0'
     )
-
+    # result2 = get_prediction(img, detection_model_seg, full_shape=(2160,3840))
+    # result2.export_visuals(export_dir="demo_data/yoloonly.jpg")
 
     result = get_sliced_prediction(
         img,

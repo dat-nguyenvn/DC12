@@ -16,7 +16,7 @@ def convert_to_serializable(obj):
         return [convert_to_serializable(element) for element in obj]
     return obj
 
-def save_in_step(output_dir, index, dict_obj, array_obj, list_obj):
+def save_in_step(output_dir, index, dict_obj, array_obj,array_after,statu,list_obj):
     """
     Save a dictionary, a NumPy array, and a list to separate files in specified subdirectories.
 
@@ -30,15 +30,21 @@ def save_in_step(output_dir, index, dict_obj, array_obj, list_obj):
     # Create subdirectories if they don't exist
     dict_dir = os.path.join(output_dir, "dict")
     point_dir = os.path.join(output_dir, "point")
+    point_dir_after = os.path.join(output_dir, "point_after")
+    status_dir = os.path.join(output_dir, "status")
     trackinglist_dir = os.path.join(output_dir, "trackinglist")
 
     os.makedirs(dict_dir, exist_ok=True)
     os.makedirs(point_dir, exist_ok=True)
+    os.makedirs(point_dir_after, exist_ok=True)
+    os.makedirs(status_dir, exist_ok=True)
     os.makedirs(trackinglist_dir, exist_ok=True)
 
     # Construct file names
     dict_filename = os.path.join(dict_dir, f"frame_{index}.json")
     array_filename = os.path.join(point_dir, f"frame_{index}.npy")
+    array_filename_after = os.path.join(point_dir_after, f"frame_{index}.npy")
+    status_filename = os.path.join(status_dir, f"frame_{index}.npy")
     list_filename = os.path.join(trackinglist_dir, f"frame_{index}.pkl")
 
     # Convert dictionary to serializable format
@@ -50,6 +56,9 @@ def save_in_step(output_dir, index, dict_obj, array_obj, list_obj):
 
     # Save NumPy array as .npy file
     np.save(array_filename, array_obj)
+    np.save(array_filename_after, array_after)
+    print("statustatu ",statu.shape)
+    np.save(status_filename, statu)
 
     # Save list as a pickle file
     with open(list_filename, 'wb') as list_file:

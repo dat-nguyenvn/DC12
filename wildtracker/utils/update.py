@@ -40,7 +40,7 @@ class update():
         #             history_points_in_mask[i] += 1
 
         return history_points_in_mask
-    def update_list_dict_info(self,list_dict_info,newid, bbox,groupid_center,list_tuple_five_points,conf,threshold_conf=2):
+    def update_list_dict_info(self,list_dict_info,newid, bbox,groupid_center,list_tuple_five_points,conf,threshold_conf=0.8):
         #use for new ID
 
         if conf>threshold_conf:

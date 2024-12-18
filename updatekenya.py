@@ -49,13 +49,14 @@ from wildtracker.ultilkenya import filter_dict_main_overlap_box,draw_window_and_
 parser = argparse.ArgumentParser(description="DC12 parses arguments with defaults.")
 
 # Add arguments with default values
-parser.add_argument("--input_fordel_path", type=str, default='/data/captest/capture/DJI_0117_video4/frames/', help="Your name (default: 'User')")
+parser.add_argument("--input_fordel_path", type=str, default='/data/captest/capture/DJI_0117_video4/frames/', help="Your name (default: 'User')") 
+#'/data/captest/capture/DJI_0117_video4/frames/'
 
 parser.add_argument("--save_folder", type=str, default='./demo_data/demo2/', help="Your age (default: 18)")
 parser.add_argument("--save_video_dir", type=str, default='./demo_data/demo_test.mp4', help="Your age (default: 18)")
 parser.add_argument("--save_window_path", type=str, default='./demo_data/window/', help="Your age (default: 18)")
 parser.add_argument("--model_detection", type=str, default='yolov8x-seg.pt', help="[yolov8n-seg.pt, yolov8x-seg.pt,yolov8m-seg.pt, yolov8n-seg.engine]")
-parser.add_argument("--length_run", type=int, default=200, help="Your age (default: 18)")
+parser.add_argument("--length_run", type=int, default=300, help="Your age (default: 18)")
 parser.add_argument("--point_not_inmask", type=int, default=200, help="Your age (default: 18)")
 parser.add_argument("--ecl_dis_match", type=int, default=10, help="Your age (default: 18)")
 parser.add_argument("--thesshold_area_each_animal", type=int, default=1000, help="Your age (default: 18)")
@@ -197,7 +198,7 @@ while True:
 
 
     idx_list_need_remove_status=check_live_info().check_and_find_remove_list(sta=status,history_point=history_point_inmask,threshold_point_not_inmask=point_not_inmask,cur_point= curFeatures.cpu(),ID_list=id_list_intrack,dict_inside=list_dict_info_main)
-    save_in_step(args.save_folder,inputsource.index,list_dict_info_main,curFeatures.cpu(),id_list_intrack)
+    save_in_step(args.save_folder,inputsource.index,list_dict_info_main,curFeatures.cpu(),prevFeatures.cpu(),status.cpu(),id_list_intrack)
 
     row_at_the_edge=np.where(np.any(curFeatures.cpu() < 5, axis=1))[0].tolist()
     if row_at_the_edge!=[]:
