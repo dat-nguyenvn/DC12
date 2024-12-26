@@ -40,7 +40,7 @@ class update():
         #             history_points_in_mask[i] += 1
 
         return history_points_in_mask
-    def update_list_dict_info(self,list_dict_info,newid, bbox,groupid_center,list_tuple_five_points,conf,threshold_conf=0.8):
+    def update_list_dict_info(self,list_dict_info,newid, bbox,groupid_center,list_tuple_five_points,conf,threshold_conf=0.2):
         #use for new ID
 
         if conf>threshold_conf:
@@ -62,12 +62,12 @@ class update():
                             'drift':(0,0)
                             
                             }
-        else: 
+        if conf>threshold_conf: 
             new_id_dict= {'image_id': newid,
                 'bbox': bbox, # [x,y,w,h]
                 'score': conf, #float
                 'category_id': None, #int
-                'category_name': None, #str
+                'category_name': 'zebra', #str
                 'segmentation': [],
                 'iscrowd': 0,
                 'area': 0,

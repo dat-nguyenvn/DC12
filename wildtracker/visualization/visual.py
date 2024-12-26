@@ -115,7 +115,7 @@ class visual_image():
                     y2 = int(y_top_left + h )
                     
                     # Draw rectangle on the image (blue color with thickness 2)
-                    cv2.rectangle(np_image, (x1, y1), (x2, y2), color=(255, 0, 0), thickness=2)
+                    cv2.rectangle(np_image, (x1, y1), (x2, y2), color=(255, 0, 0), thickness=1)
                     
                     # Optionally, display the category name at the top of the bounding box
                     category_name = item.get('category_name', 'Unknown')
@@ -149,7 +149,7 @@ class visual_image():
 
         return np_image
 
-    def draw_one_id_on_image(self,image, bbox, image_id, color,conf='0',class_name='',thickness=10):
+    def draw_one_id_on_image(self,image, bbox, image_id, color,conf='0',class_name='',thickness=2,font_scale = 2):
         """
         Draw a bounding box with a label on the image.
         Args:
@@ -171,10 +171,10 @@ class visual_image():
         
         # Text settings
         font = cv2.FONT_HERSHEY_SIMPLEX
-        font_scale = 2
-        font_thickness = 10
-        text = f'{class_name}: {image_id} ; conf: {conf:.2f}'
         
+        font_thickness = thickness
+        text = f'{class_name}: {image_id} ; conf: {conf:.2f}'
+        text = f'{class_name}: {image_id}'
         # Calculate text size and position
         text_size = cv2.getTextSize(text, font, font_scale, font_thickness)[0]
         text_x = x
@@ -183,11 +183,11 @@ class visual_image():
         # Draw text (image_id)
         cv2.putText(image, text, (text_x, text_y), font, font_scale, color, font_thickness)
         return image
-    def visual_bounding_box_of_dict(self,dict_inside,np_image,tracking_list):
+    def visual_bounding_box_of_dict(self,dict_inside,np_image,tracking_list,fontscale=2):
 
         unique_values = set(tracking_list)
         #print("unique_values in reconstruct ",unique_values)
-        out_img=np_image
+        out_img=np.copy(np_image)
         for unique in unique_values:
             '''
             for item in dict_inside:
@@ -207,17 +207,17 @@ class visual_image():
                 x2 = int(x_top_left + w )
                 y2 = int(y_top_left + h )
                 if item['visible']==True:
-                    out_img=self.draw_one_id_on_image(np_image, item['bbox'], item['image_id'], item['color'],item['score'],category_name)
+                    out_img=self.draw_one_id_on_image(out_img, item['bbox'], item['image_id'], item['color'],item['score'],category_name,font_scale=fontscale)
                     # out_img=cv2.putText(out_img, category_name, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 
                     #             fontScale=0.5, color=(255, 0, 0), thickness=1)   
                 elif item['visible']==False:
-                    out_img=self.draw_one_id_on_image(np_image, item['bbox'], ' ' , (128, 128, 128),item['score'])
+                    out_img=self.draw_one_id_on_image(out_img, item['bbox'], ' ' , (128, 128, 128),item['score'],font_scale=fontscale)
                     # out_img=cv2.putText(out_img, category_name, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 
                     #             fontScale=0.5, color=(255, 0, 0), thickness=1)   
 
 
         return out_img
-    def draw_pixels_with_colors(self,image, featurecpu, id_list_intrack, new_id_dict_list):
+    def draw_pixels_with_colors(self,np_image, featurecpu, id_list_intrack, new_id_dict_list,radius=10):
         """
         Draws pixels on the image with colors corresponding to their IDs.
         
@@ -230,6 +230,7 @@ class visual_image():
         Returns:
             np.ndarray: The image with colored pixels.
         """
+        img=np.copy(np_image)
         pixel_positions=convert_process().convert_featurecpu_to_list_tuple(featurecpu)
         # Create a dictionary to map image_id to color from the list of dictionaries
         id_to_color = {obj['image_id']: obj['color'] for obj in new_id_dict_list.values()}
@@ -240,8 +241,8 @@ class visual_image():
             color = id_to_color.get(image_id, (0, 0, 0))  # Get the color for this ID, default to black if not found
             
             # Draw the pixel by setting the color at the pixel location
-            cv2.circle(image, (x,y), 10, color, -1)
-        return image
+            cv2.circle(img, (x,y), radius, color, -1)
+        return img
 
     def draw_all_on_window(self,yolo_output,box_matched,dict_inside,points,window_center,tracking_list):
         np_img = yolo_output[0].orig_img
@@ -369,7 +370,7 @@ class visual_image():
 
 
     def add_text_with_background(self,image: np.ndarray, text: str, position=(10, 10), 
-                                font_scale=4, font_thickness=5, 
+                                font_scale=2, font_thickness=5, 
                                 text_color=(255, 255, 255), background_color=(0, 0, 0)) -> np.ndarray:
         """
         Adds text with a tightly fitted background rectangle to an image.

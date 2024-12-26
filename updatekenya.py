@@ -56,7 +56,7 @@ parser.add_argument("--save_folder", type=str, default='./demo_data/demo2/', hel
 parser.add_argument("--save_video_dir", type=str, default='./demo_data/demo_test.mp4', help="Your age (default: 18)")
 parser.add_argument("--save_window_path", type=str, default='./demo_data/window/', help="Your age (default: 18)")
 parser.add_argument("--model_detection", type=str, default='yolov8x-seg.pt', help="[yolov8n-seg.pt, yolov8x-seg.pt,yolov8m-seg.pt, yolov8n-seg.engine]")
-parser.add_argument("--length_run", type=int, default=300, help="Your age (default: 18)")
+parser.add_argument("--length_run", type=int, default=200, help="Your age (default: 18)")
 parser.add_argument("--point_not_inmask", type=int, default=200, help="Your age (default: 18)")
 parser.add_argument("--ecl_dis_match", type=int, default=10, help="Your age (default: 18)")
 parser.add_argument("--thesshold_area_each_animal", type=int, default=1000, help="Your age (default: 18)")
@@ -75,7 +75,7 @@ save_folder=args.save_folder #'/home/src/yolo/ultralytics/demo_data/demo2/'
 save_window_path=args.save_window_path #'/home/src/yolo/ultralytics/demo_data/window/'
 input_fordel_path=args.input_fordel_path #'/home/src/data/captest/capture/DJI_0117_video4/frames/'
 model =YOLO(args.model_detection) # YOLO('yolov8n-seg.pt')
-
+save_folder_small='./demo_data/small/'
 #DJI_0133_video1 : con huou
 #DJI_0601_video1
 #DJI_0117_video4 herd
@@ -191,6 +191,7 @@ while True:
     curFeatures, status = optflow(frame)
     list_of_tuples = [tuple(map(int, row)) for row in curFeatures.cpu().tolist()]
     rgb_image = cv2.cvtColor(cvFrame, cv2.COLOR_BGR2RGB)
+
     #show_image=visualize_points_on_image(image_np=rgb_image,points=list_of_tuples)
     # plt.imshow(show_image)
     # plt.show()
@@ -233,7 +234,7 @@ while True:
     # plt.show()
 
     #print("window_detection", window_detection.shape)
-    out_detector=model.predict(window_detection,show_boxes=True, save_crop=False ,show_labels=False,show_conf=False,save=False, classes=[20,22,23],conf=0.1,imgsz=(640,640))
+    out_detector=model.predict(window_detection,show_boxes=True, save_crop=False ,show_labels=False,show_conf=False,save=False, classes=[20,22,23],conf=0.3,imgsz=(640,640))
 
     history_point_inmask = [x + 1 for x in history_point_inmask]
     #print("out_detector[0]",out_detector[0])
@@ -321,11 +322,22 @@ while True:
     #text=text_image_size + text_fps
     print(f"Elapsed time: {elapsed_time:.5f} seconds")
 
+
+
     show_end_image=visual_image().visual_bounding_box_of_dict(list_dict_info_main,rgb_image,id_list_intrack)
-    show_end_image=visual_image().draw_pixels_with_colors(rgb_image,curFeatures.cpu(),id_list_intrack,list_dict_info_main)
-    show_end_image=visual_image().draw_window(rgb_image,center_crop,color=window_color)
+
+    show_end_image=visual_image().draw_pixels_with_colors(show_end_image,curFeatures.cpu(),id_list_intrack,list_dict_info_main)
+
+    small_text_image=visual_image().visual_bounding_box_of_dict(list_dict_info_main,rgb_image,id_list_intrack,fontscale=1)
+    small_text_image=visual_image().draw_pixels_with_colors(small_text_image,curFeatures.cpu(),id_list_intrack,list_dict_info_main,radius=5)
+
+
+
+
+
+    #show_end_image=visual_image().draw_window(rgb_image,center_crop,color=window_color)
     show_end_image=visual_image().add_text_with_background(show_end_image,text_fps)
-    show_end_image=visual_image().add_text_with_background(show_end_image,text_image_size, position=(w-1500,10) )
+    show_end_image=visual_image().add_text_with_background(show_end_image,text_image_size, position=(w-800,10) )
     
     #cuda_frame = jetson.utils.cudaFromNumpy(show_end_image)
 
@@ -338,6 +350,9 @@ while True:
     
     file_path = os.path.join(save_folder, name)
     plt.imsave(file_path, show_end_image)
+    
+    small_path= os.path.join(save_folder_small, name)
+    plt.imsave(small_path, small_text_image)
 
 average = sum(speed) / len(speed)
 print("average",average)
