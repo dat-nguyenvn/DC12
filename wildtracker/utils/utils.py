@@ -1,4 +1,6 @@
 import numpy as np
+import yaml
+
 def need_add_id_and_point(matched_box): #todo: add to check class
     if matched_box!=None:
         if  0 in matched_box:
@@ -149,4 +151,7 @@ def generate_high_contrast_colors():
             return (int(color_gen[0]), int(color_gen[1]),int(color_gen[2]))
             
     
-    
+
+def load_config(config_path):
+    with open(config_path, 'r') as file:
+        return yaml.safe_load(file)
