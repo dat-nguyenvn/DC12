@@ -39,9 +39,9 @@ from wildtracker.points_selection import *
 from wildtracker.visualization import *
 from wildtracker.matching import matching_module,calculate_average_distance,unique_id_not_in_matched_box,center_of_box_detected
 from wildtracker.reconstruct import reconstruct_process
-from wildtracker.utils.utils import compute_centroid, check_box_overlap,need_add_id_and_point,need_increase_point_for_id
+from wildtracker.utils.utils import compute_centroid, check_box_overlap,need_add_id_and_point,need_increase_point_for_id,load_config
 from wildtracker.utils.save import save_in_step
-from wildtracker.videosource import rtsp_stream,input_folder
+from wildtracker.videosource import rtsp_stream,input_folder,videosourceprovider
 from wildtracker.ultilkenya import filter_dict_main_overlap_box,draw_window_and_center
 #from jetson_utils import videoSource, videoOutput
 #import jetson.utils
@@ -76,6 +76,9 @@ save_window_path=args.save_window_path #'/home/src/yolo/ultralytics/demo_data/wi
 input_fordel_path=args.input_fordel_path #'/home/src/data/captest/capture/DJI_0117_video4/frames/'
 model =YOLO(args.model_detection) # YOLO('yolov8n-seg.pt')
 save_folder_small='./demo_data/small/'
+
+
+
 #DJI_0133_video1 : con huou
 #DJI_0601_video1
 #DJI_0117_video4 herd
@@ -90,7 +93,7 @@ save_folder_small='./demo_data/small/'
 #inputsource= input_folder(args.input_fordel_path)
 
 #inputsource= rtsp_stream(rtsp_link="rtsp://aaa:aaa@192.168.137.195:8554/streaming/live/1")
-inputsource= input_folder(args.input_fordel_path)
+inputsource= videosourceprovider(args.input_fordel_path)
 
 
 

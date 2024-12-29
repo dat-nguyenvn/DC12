@@ -41,7 +41,7 @@ from wildtracker.matching import matching_module,calculate_average_distance,uniq
 from wildtracker.reconstruct import reconstruct_process
 from wildtracker.utils.utils import compute_centroid, check_box_overlap,need_add_id_and_point,need_increase_point_for_id,load_config
 from wildtracker.utils.save import save_in_step
-from wildtracker.videosource import rtsp_stream,input_folder
+from wildtracker.videosource import rtsp_stream,input_folder,videosourceprovider
 from wildtracker.ultilkenya import filter_dict_main_overlap_box,draw_window_and_center
 #from jetson_utils import videoSource, videoOutput
 #import jetson.utils
@@ -82,7 +82,8 @@ save_folder_small='./demo_data/small/'
 #inputsource= input_folder(args.input_fordel_path)
 
 #inputsource= rtsp_stream(rtsp_link="rtsp://aaa:aaa@192.168.137.195:8554/streaming/live/1")
-inputsource= input_folder(config['input_fordel_path'])
+print("config['input_fordel_path']",config['input_fordel_path'])
+inputsource= videosourceprovider(config['input_fordel_path'])
 
 
 
@@ -174,7 +175,9 @@ while True:
         break
 
 
-    idFrame =inputsource.index 
+    idFrame =inputsource.index()
+    print("idFrame",idFrame)
+    print("idFrame type ",type(idFrame))
     # path=input_fordel_path+"frame_"+str(idFrame)+".jpg"
     # cvFrame=cv2.imread(path)
 
