@@ -110,10 +110,10 @@ class update():
 
             if value!=0 and yolo_detector[0].boxes.conf.cpu().numpy()[idx]<threshold_box_conf:
                 dict_inside[value]['score']+=yolo_detector[0].boxes.conf.cpu().numpy()[idx]
-                if dict_inside[value]['score']>0.8:
+                if dict_inside[value]['score']>=0.8:
                     dict_inside[value]['visible']=True
-                # else:  
-                #     dict_inside[value]['visible']=False
+                elif dict_inside[value]['score']<0.8:  
+                    dict_inside[value]['visible']=False
 
                 
 

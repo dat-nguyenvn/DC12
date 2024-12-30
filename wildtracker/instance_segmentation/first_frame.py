@@ -30,7 +30,7 @@ def init_detection(img,model_name):
     detection_model_seg = AutoDetectionModel.from_pretrained(
     model_type='yolov8',
     model_path=yolov8_seg_model_path,
-    confidence_threshold=0.5,
+    confidence_threshold=0.1,
     device="cuda", # or 'cuda:0'
     )
     # result2 = get_prediction(img, detection_model_seg, full_shape=(2160,3840))

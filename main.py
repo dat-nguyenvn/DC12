@@ -93,7 +93,6 @@ rgb_image=im
 
 
 result_main=init_detection(rgb_image, config['model_detection'])
-#result_main=filter_init_detection(result_main)
 trackpoint_list_tuple,id_list_intrack,history_point_inmask,list_dict_info_main,show_image = process_first_frame(result_main)
 list_dict_info_main=process_boxes_complete_step_init(list_dict_info_main,id_list_intrack,trackpoint_list_tuple)
 
@@ -103,11 +102,8 @@ trackpoint_list_tuple,id_list_intrack,history_point_inmask=remove_intrack().appl
 print("rm_list",rm_list)
 
 show_image=visual_image().draw_info_from_main_dict(show_image,list_dict_info_main)
-
-#show_image=visual_image().visual_bounding_box_of_dict(list_dict_info_main,show_image,id_list_intrack)
  
 print("h",h,"w",w)
-
 plt.imshow(show_image)
 plt.show()
 
@@ -149,10 +145,6 @@ with vpi.Backend.CUDA:
 
 #start_time = time.time()
 
-
-
-with vpi.Backend.CUDA:
-    optflow = vpi.OpticalFlowPyrLK(frame, curFeatures,5)
 while True:
     start_time = time.time()
     print(idFrame)
@@ -176,8 +168,6 @@ while True:
 
 
     idFrame =inputsource.index()
-    print("idFrame",idFrame)
-    print("idFrame type ",type(idFrame))
     # path=input_fordel_path+"frame_"+str(idFrame)+".jpg"
     # cvFrame=cv2.imread(path)
 
@@ -210,7 +200,7 @@ while True:
         with vpi.Backend.CUDA:
             optflow = vpi.OpticalFlowPyrLK(frame, curFeatures, 5)
 
-    list_dict_info_main=filter_dict_main_overlap_box(list_dict_info_main)
+    #list_dict_info_main=filter_dict_main_overlap_box(list_dict_info_main)
     list_dict_info_main=reconstruct_process(show_image,list_dict_info_main,curFeatures.cpu(),id_list_intrack)
 
     #list_dict_info_main=reconstruct_process(show_image,list_dict_info_main,curFeatures.cpu(),id_list_intrack)

@@ -1,4 +1,4 @@
-input_fordel_path: '/data/captest/capture/DJI_0117_video4/frames/'
+input_fordel_path: '/data/captest/capture/DJI_0204_video1/frames/'
 save_folder: './demo_data/demo2/'
 save_video_dir: './demo_data/demo_test.mp4'
 save_window_path: './demo_data/window/'

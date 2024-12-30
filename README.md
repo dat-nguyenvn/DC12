@@ -63,7 +63,7 @@ cd ..
 
 ### Run WildTracker
 ```bash 
-python3 updatekenya.py
+python3 main.py --config ./config/default.yaml
 ```
 
 ### Setup environment on Jetson
