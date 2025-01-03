@@ -6,11 +6,19 @@ def load_mot_results(gt_path, tracker_path):
     Load ground truth and tracker results into DataFrames.
     """
     gt = pd.read_csv(gt_path, header=None, names=[
-        'FrameId', 'Id', 'X', 'Y', 'Width', 'Height', 'Confidence', 'Class', 'Visibility'
-    ])
+        'FrameId', 'Id', 'X', 'Y', 'Width', 'Height', 'Confidence', 'Class', 'Visibility',"Attributes"
+    ])#frame_id,object_id,xmin,ymin,width,height,confidence,-1,-1,-1
+
     tracker = pd.read_csv(tracker_path, header=None, names=[
-        'FrameId', 'Id', 'X', 'Y', 'Width', 'Height', 'Confidence', 'Class', 'Visibility'
+        'FrameId', 'Id', 'X', 'Y', 'Width', 'Height', 'Confidence', 'Class', 'Visibility',"Attributes"
     ])
+    gt['Id'] = pd.to_numeric(gt['Id'], errors='coerce')
+    tracker['Id'] = pd.to_numeric(tracker['Id'], errors='coerce')
+
+    # Remove rows where 'Id' is NaN (invalid entries)
+    gt = gt.dropna(subset=['Id'])
+    tracker = tracker.dropna(subset=['Id'])
+
     return gt, tracker
 
 def evaluate_mot(gt_path, tracker_path):
@@ -31,7 +39,7 @@ def evaluate_mot(gt_path, tracker_path):
         gt_boxes = gt_frame[['X', 'Y', 'Width', 'Height']].values
         tr_boxes = tr_frame[['X', 'Y', 'Width', 'Height']].values
 
-        distances = mm.distances.iou_matrix(gt_boxes, tr_boxes, max_iou=0.5)
+        distances = mm.distances.iou_matrix(gt_boxes, tr_boxes, max_iou=0.9)
         acc.update(gt_ids, tr_ids, distances)
 
     # Compute metrics
@@ -44,6 +52,7 @@ def evaluate_mot(gt_path, tracker_path):
 # Paths to ground truth and tracker result CSV files
 gt_path = 'sample_gt.csv'  # Ground truth CSV
 tracker_path = 'sample_tracker_results.csv'  # Tracker's result CSV
-
+gt_path = 'ground_truth.csv'  # Ground truth CSV
+tracker_path = 'wildtrack.csv'  # Tracker's result CSV
 # Evaluate tracker
 evaluate_mot(gt_path, tracker_path)
