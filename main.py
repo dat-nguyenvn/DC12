@@ -19,7 +19,8 @@ import json
 import natsort
 import imageio
 import random
-
+import pandas as pd
+import csv
 import argparse
 
 from sahi.utils.yolov8 import (download_yolov8s_model, download_yolov8s_seg_model)
@@ -43,6 +44,8 @@ from wildtracker.utils.utils import compute_centroid, check_box_overlap,need_add
 from wildtracker.utils.save import save_in_step
 from wildtracker.videosource import rtsp_stream,input_folder,videosourceprovider
 from wildtracker.ultilkenya import filter_dict_main_overlap_box,draw_window_and_center
+from wildtracker.evaluation.generate_predict import generate_to_mot_format
+
 #from jetson_utils import videoSource, videoOutput
 #import jetson.utils
 
@@ -129,8 +132,10 @@ center_window_list,border_center_point,salient_center_point=generate_centers().g
 
 # plt.imshow(win_vi)
 # plt.show()
+predict_mot=[]
 
-idFrame=0
+
+idFrame=inputsource.index()
 remove_dict={}
 speed=[]
 with vpi.Backend.CPU:
@@ -146,6 +151,9 @@ with vpi.Backend.CUDA:
 #start_time = time.time()
 
 while True:
+    line_mot=generate_to_mot_format(idFrame,list_dict_info_main)
+    predict_mot.append(line_mot)
+
     start_time = time.time()
     print(idFrame)
     prevFeatures = curFeatures
@@ -338,6 +346,15 @@ while True:
     
     small_path= os.path.join(save_folder_small, name)
     plt.imsave(small_path, small_text_image)
+
+
+flattened_data = [item for sublist in predict_mot for item in sublist]
+csv_filename = './demo_data/outputgood.csv'
+mot_df = pd.DataFrame(flattened_data, columns=["frame", "id", "x", "y", "w", "h", "confidence", "class_id","abc","bcd"])
+mot_df.to_csv(csv_filename, index=False,header=False)
+# with open(csv_filename, mode='w', newline='') as file:
+#     writer = csv.writer(file)
+#     writer.writerows(flattened_data)
 
 average = sum(speed) / len(speed)
 print("average",average)

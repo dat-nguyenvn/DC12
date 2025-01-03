@@ -1,10 +1,11 @@
-input_fordel_path: '/data/captest/cap_eval_data/vlc-record-2025-01-03-14h37m50s-DJI_20240624153820_0001_V/frames/'
+input_fordel_path: "/data/captest/eval/frames/"
 save_folder: './demo_data/demo2/'
 save_video_dir: './demo_data/demo_test.mp4'
 save_window_path: './demo_data/window/'
 model_detection: 'yolov8x-seg.pt'
-length_run: 160
+length_run: 60
 point_not_inmask: 200
-ecl_dis_match: 10
+ecl_dis_match: 100
 thesshold_area_each_animal: 1000
+
 

@@ -6,10 +6,12 @@ import os
 
 # Load YOLOv8 model (you can use the pre-trained weights)
 from ultralytics import YOLO
-
+data="/data/captest/eval/frames/"
+#data="/data/captest/cap_eval_data/vlc-record-2025-01-03-14h37m50s-DJI_20240624153820_0001_V/frames/"
 # Configure the tracking parameters and run the tracker
 model = YOLO("yolov8x.pt")
-results = model.track(source="/data/captest/eval/frames/", conf=0.1, iou=0.5, show=True,tracker="bytetrack.yaml")
+results = model.track(source=data, conf=0.1, iou=0.5, show=True,tracker="bytetrack.yaml",classes=[20,22,23])
+
 mot_results = []
 print()
 # Iterate over the frames in the tracking results

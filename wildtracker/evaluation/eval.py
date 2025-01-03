@@ -50,9 +50,14 @@ def evaluate_mot(gt_path, tracker_path):
     ))
 
 # Paths to ground truth and tracker result CSV files
-gt_path = 'sample_gt.csv'  # Ground truth CSV
-tracker_path = 'sample_tracker_results.csv'  # Tracker's result CSV
 gt_path = 'ground_truth.csv'  # Ground truth CSV
 tracker_path = 'wildtrack.csv'  # Tracker's result CSV
+gt_path = 'ground_truth_vlc-record-2025-01-03-14h37m50s-DJI_20240624153820_0001_V.csv'  # Ground truth CSV
+tracker_path = 'output.csv'  # Tracker's result CSV
+
+gt_path = 'ground_truth.csv'  # Ground truth CSV
+tracker_path = 'wildtrack.csv'  # Tracker's result CSV
+tracker_path = 'outputgood.csv'  # Tracker's result CSV
+
 # Evaluate tracker
 evaluate_mot(gt_path, tracker_path)
