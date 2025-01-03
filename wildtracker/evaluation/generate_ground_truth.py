@@ -3,8 +3,10 @@ import json
 import csv
 
 # Define the folder path where your .json files are located
-json_folder = '/media/ah23975/Crucial X9/captest/eval/frames/'  # Change this to your actual folder path
-output_csv_file = 'ground_truth.csv'  # Output file for MOT format
+#json_folder = '/media/ah23975/Crucial X9/captest/eval/frames/'  # Change this to your actual folder path
+json_folder = '/data/captest/cap_eval_data/vlc-record-2025-01-03-14h37m50s-DJI_20240624153820_0001_V/frames/'  # Change this to your actual folder path
+
+output_csv_file = 'ground_truth_vlc-record-2025-01-03-14h37m50s-DJI_20240624153820_0001_V.csv'  # Output file for MOT format
 
 # Function to convert the bounding box points to MOT format (xmin, ymin, width, height)
 def convert_to_bbox(points):
