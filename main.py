@@ -227,7 +227,7 @@ while True:
     # plt.show()
 
     #print("window_detection", window_detection.shape)
-    out_detector=model.predict(window_detection,show_boxes=True, save_crop=False ,show_labels=False,show_conf=False,save=False, classes=[20,22,23],conf=0.3,imgsz=(640,640))
+    out_detector=model.predict(window_detection,show_boxes=True, save_crop=False ,show_labels=False,show_conf=False,save=False, classes=[0,1,2,3,5,7],conf=0.5,imgsz=(640,640))  # [20,22,23]
 
     history_point_inmask = [x + 1 for x in history_point_inmask]
     #print("out_detector[0]",out_detector[0])

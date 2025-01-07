@@ -149,15 +149,18 @@ class matching_module():
         #print("number_bbox",number_bbox)
         match_box_id=[0]*number_bbox  # 0 mean unmatch to any id; init step
         for idx_mask,poa_per_mask in enumerate(poa_table):
-            best_match_index=poa_per_mask.index(max(poa_per_mask))
-            #print("best_match_index",best_match_index)
+            if poa_per_mask:
+                print("poa_table",poa_table)
+                print("poa_per_mask",poa_per_mask)
+                best_match_index=poa_per_mask.index(max(poa_per_mask))
+                #print("best_match_index",best_match_index)
 
-            #todo: threshold 0.4 ? + .index(max(poa_per_mask))\
-            #  la tim vi tri dau tien cua gia tri max, \
-            # neu co 2 index = nhau co loi nhe
-            #todo check heare
-            if poa_per_mask[best_match_index]>=0.5 : 
-                match_box_id[idx_mask]=unique_values[best_match_index]
+                #todo: threshold 0.4 ? + .index(max(poa_per_mask))\
+                #  la tim vi tri dau tien cua gia tri max, \
+                # neu co 2 index = nhau co loi nhe
+                #todo check heare
+                if poa_per_mask[best_match_index]>=0.5 : 
+                    match_box_id[idx_mask]=unique_values[best_match_index]
 
 
         print("match_box_id",match_box_id)

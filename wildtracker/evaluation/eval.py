@@ -18,6 +18,8 @@ def load_mot_results(gt_path, tracker_path):
     # Remove rows where 'Id' is NaN (invalid entries)
     gt = gt.dropna(subset=['Id'])
     tracker = tracker.dropna(subset=['Id'])
+    #gt = gt.sort_values(by="FrameId")
+
 
     return gt, tracker
 
@@ -39,7 +41,7 @@ def evaluate_mot(gt_path, tracker_path):
         gt_boxes = gt_frame[['X', 'Y', 'Width', 'Height']].values
         tr_boxes = tr_frame[['X', 'Y', 'Width', 'Height']].values
 
-        distances = mm.distances.iou_matrix(gt_boxes, tr_boxes, max_iou=0.9)
+        distances = mm.distances.iou_matrix(gt_boxes, tr_boxes, max_iou=0.5)
         acc.update(gt_ids, tr_ids, distances)
 
     # Compute metrics
@@ -55,9 +57,9 @@ tracker_path = 'wildtrack.csv'  # Tracker's result CSV
 gt_path = 'ground_truth_vlc-record-2025-01-03-14h37m50s-DJI_20240624153820_0001_V.csv'  # Ground truth CSV
 tracker_path = 'output.csv'  # Tracker's result CSV
 
-gt_path = 'ground_truth.csv'  # Ground truth CSV
-tracker_path = 'wildtrack.csv'  # Tracker's result CSV
-tracker_path = 'outputgood.csv'  # Tracker's result CSV
+gt_path = 'uav0000009_03358_v.csv'  # Ground truth CSV
+#tracker_path = 'wildtrack.csv'  # Tracker's result CSV
+tracker_path = 'bytetrack_visdrone.csv'  # Tracker's result CSV
 
 # Evaluate tracker
 evaluate_mot(gt_path, tracker_path)
