@@ -6,3 +6,4 @@ ultralytics
 jetson-inference
 test
 wildtracker/evaluation/yolov8x.pt
+yolov11n.pt
