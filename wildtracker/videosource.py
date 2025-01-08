@@ -6,7 +6,8 @@ import sys
 import numpy as np
 from natsort import natsorted
 
-
+from jetson_utils import videoSource, videoOutput
+import jetson.utils
 
 
 
@@ -29,6 +30,7 @@ class videosourceprovider:
         """
         if "rtsp" in source_type.lower():
             # RTSP stream
+            print("hahah rtsp hree")
             return rtsp_stream(rtsp_link=source_type)
         elif "camera" in source_type.lower():
             # USB camera
@@ -57,23 +59,49 @@ class videosourceprovider:
 
 class rtsp_stream(videosourceprovider):
     def __init__(self, rtsp_link="rtsp://192.168.144.25:8554/main.264"):
-        from jetson_utils import videoSource, videoOutput
-        import jetson.utils
+        # from jetson_utils import videoSource, videoOutput
+        # import jetson.utils
+        #self.jetson_utils = jetson.utils
         self.rtsp = videoSource(rtsp_link, argv=sys.argv) 
-        self.output = videoOutput('', argv=sys.argv) 
+        #self.output = videoOutput('', argv=sys.argv) 
         self.index = 0
 
 
 
+    # def get_frame(self):
+    #     #format avaiable : rgb8 , rgb32f; 
+    #     # detail check here:https://github.com/dusty-nv/jetson-inference/blob/master/docs/aux-streaming.md#rtsp
+    #     frame = self.rtsp.Capture(format='rgb8', timeout=1000)
+    #     np_frame=jetson.utils.cudaToNumpy(frame)
+    #     np_frame=np.ascontiguousarray(np_frame[..., ::-1])
+    #     self.index += 1
+    #       #type cuda image  #RGB
+    #     return np_frame
+
     def get_frame(self):
-        #format avaiable : rgb8 , rgb32f; 
-        # detail check here:https://github.com/dusty-nv/jetson-inference/blob/master/docs/aux-streaming.md#rtsp
-        frame = self.rtsp.Capture(format='rgb8', timeout=1000)
-        np_frame=jetson.utils.cudaToNumpy(frame)
-        np_frame=np.ascontiguousarray(np_frame[..., ::-1])
-        self.index += 1
-          #type cuda image  #RGB
-        return np_frame
+        try:
+            # Capture frame
+            frame = self.rtsp.Capture(format='rgb8', timeout=1000)
+            
+            # Debugging: Check frame type
+            if frame is None:
+                raise ValueError("No frame captured. Check RTSP stream.")
+            
+            print("Captured frame type:", type(frame))
+            
+            # Convert to NumPy array
+            np_frame = jetson.utils.cudaToNumpy(frame)
+            print("Converted frame shape:", np_frame.shape)
+
+            # Make contiguous and convert RGB to BGR
+            np_frame = np.ascontiguousarray(np_frame[..., ::-1])
+            self.index += 1
+            
+            return np_frame
+        except Exception as e:
+            print("Error in get_frame:", e)
+            raise
+
     def get_cuda_frame(self):
         #format avaiable : rgb8 , rgb32f; 
         # detail check here:https://github.com/dusty-nv/jetson-inference/blob/master/docs/aux-streaming.md#rtsp

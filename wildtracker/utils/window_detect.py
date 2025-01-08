@@ -29,7 +29,8 @@ class generate_centers():
         centers = []
         border_centers = []
         salient_centers = []
-        
+        print("frame_width aaaaaaa ",frame_width)
+        print("frame_height aaaaaaa ",frame_height)
         # Calculate the number of tiles needed along width and height
         num_tiles_x = (frame_width + tile_width - overlap_width - 1) // (tile_width - overlap_width)
         num_tiles_y = (frame_height + tile_height - overlap_height - 1) // (tile_height - overlap_height)
@@ -51,7 +52,7 @@ class generate_centers():
                     border_centers.append((x_center, y_center))
                 else:
                     salient_centers.append((x_center, y_center))
-
+        print("centers in generateeeeeeeeeeeee",centers)
         return centers, border_centers, salient_centers
 
     def visual(self, centers, border_centers, salient_centers):
@@ -87,40 +88,41 @@ class generate_centers():
 def strategy_pick_window(step, list_all_center, border_centers, salient_centers, current_track_points):
     big_list = [border_centers, salient_centers, current_track_points]
     current_list = big_list[step % 3]
+    center = random.choice(list_all_center)
+    win_color = (255, 0, 0)
+    # try:
+    #     if step % 3 == 0:  # Border
+    #         if current_list:  # Check if current_list is not empty
+    #             center = current_list[step // 3 % len(current_list)]
+    #             win_color = (255, 255, 0)
+    #             print("000 center", center)
+    #         else:
+    #             raise ValueError("Border centers list is empty.")
 
-    try:
-        if step % 3 == 0:  # Border
-            if current_list:  # Check if current_list is not empty
-                center = current_list[step // 3 % len(current_list)]
-                win_color = (255, 255, 0)
-                print("000 center", center)
-            else:
-                raise ValueError("Border centers list is empty.")
+    #     elif step % 3 == 1:  # Salient
+    #         if current_list:  # Check if current_list is not empty
+    #             center = current_list[step // 3 % len(current_list)]
+    #             win_color = (0, 255, 0)
+    #             print("111 center", center)
+    #         else:
+    #             raise ValueError("Salient centers list is empty.")
 
-        elif step % 3 == 1:  # Salient
-            if current_list:  # Check if current_list is not empty
-                center = current_list[step // 3 % len(current_list)]
-                win_color = (0, 255, 0)
-                print("111 center", center)
-            else:
-                raise ValueError("Salient centers list is empty.")
+    #     else:  # step % 3 == 2
+    #         if current_track_points:  # Check if current_track_points is not empty
+    #             center = random.choice(current_track_points)
+    #             win_color = (255, 0, 0)
+    #             print("strategy center", center)
+    #         else:
+    #             raise ValueError("Current track points list is empty.")
 
-        else:  # step % 3 == 2
-            if current_track_points:  # Check if current_track_points is not empty
-                center = random.choice(current_track_points)
-                win_color = (255, 0, 0)
-                print("strategy center", center)
-            else:
-                raise ValueError("Current track points list is empty.")
-
-    except ValueError as e:
-        print(f"Error: {e}. Using default strategy.")
-        if current_track_points:  # Fallback to track points if available
-            center = random.choice(current_track_points)
-        elif list_all_center:  # Fallback to any center if available
-            center = random.choice(list_all_center)
-        else:  # Final fallback to a default value
-            center = (640, 640)
-        win_color = (255, 0, 0)
+    # except ValueError as e:
+    #     print(f"Error: {e}. Using default strategy.")
+    #     if current_track_points:  # Fallback to track points if available
+    #         center = random.choice(current_track_points)
+    #     elif list_all_center:  # Fallback to any center if available
+    #         center = random.choice(list_all_center)
+    #     else:  # Final fallback to a default value
+    #         center = (640, 640)
+    #     win_color = (255, 0, 0)
 
     return center, win_color

@@ -45,7 +45,7 @@ from wildtracker.utils.save import save_in_step
 from wildtracker.videosource import rtsp_stream,input_folder,videosourceprovider
 from wildtracker.ultilkenya import filter_dict_main_overlap_box,draw_window_and_center
 from wildtracker.evaluation.generate_predict import generate_to_mot_format
-
+from wildtracker.utils.crop import crop_window
 #from jetson_utils import videoSource, videoOutput
 #import jetson.utils
 
@@ -90,7 +90,7 @@ inputsource= videosourceprovider(config['input_fordel_path'])
 
 
 
-w,h,c=inputsource.frame_size()
+h,w,c=inputsource.frame_size()
 im=inputsource.get_RGBframe_numpy()
 rgb_image=im
 
@@ -181,6 +181,7 @@ while True:
 
     with vpi.Backend.CUDA:
         frame = vpi.asimage(cvFrame, vpi.Format.BGR8).convert(vpi.Format.U8)
+        #frame = vpi.asimage(cvFrame, vpi.Format.BGR8).convert(vpi.Format.U8)
     curFeatures, status = optflow(frame)
     list_of_tuples = [tuple(map(int, row)) for row in curFeatures.cpu().tolist()]
     rgb_image = cv2.cvtColor(cvFrame, cv2.COLOR_BGR2RGB)
@@ -218,16 +219,18 @@ while True:
     # plt.show()
 
     center_crop,window_color=strategy_pick_window(idFrame,center_window_list,border_center_point,salient_center_point,[tuple(map(int, row)) for row in curFeatures.cpu().tolist()])
-    #print("cvFrame",cvFrame.shape)
+    print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",cvFrame.shape)
     
     window_detection=crop_window(cvFrame,center_crop)
+    print("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",cvFrame.shape)
+
     # abc=draw_window_and_center(cvFrame,center_crop)
 
     # plt.imshow(abc)
     # plt.show()
 
-    #print("window_detection", window_detection.shape)
-    out_detector=model.predict(window_detection,show_boxes=True, save_crop=False ,show_labels=False,show_conf=False,save=False, classes=[0,1,2,3,5,7],conf=0.5,imgsz=(640,640))  # [20,22,23]
+    print("window_detection", window_detection.shape)
+    out_detector=model.predict(window_detection,show_boxes=True, save_crop=False ,show_labels=False,show_conf=False,save=False, classes=[20,22,23],conf=0.5,imgsz=(640,640))  # [0,1,2,3,5,7]
 
     history_point_inmask = [x + 1 for x in history_point_inmask]
     #print("out_detector[0]",out_detector[0])
