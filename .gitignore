@@ -1,8 +1,12 @@
 yolov8s-seg.pt
 yolov8x-seg.pt
 yolov8n-seg.pt
+yolov11n.pt
+yolov11n-seg.pt
 demo_data
 ultralytics
 jetson-inference
 test
 wildtracker/evaluation/yolov8x.pt
+main(copy).py
+

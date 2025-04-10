@@ -20,9 +20,11 @@ wildtracker/points_selection/base_selection.py
 wildtracker/points_selection/harris.py
 wildtracker/utils/__init__.py
 wildtracker/utils/add.py
+wildtracker/utils/capture.py
 wildtracker/utils/convert.py
 wildtracker/utils/crop.py
 wildtracker/utils/remove.py
+wildtracker/utils/save.py
 wildtracker/utils/update.py
 wildtracker/utils/utils.py
 wildtracker/utils/window_detect.py

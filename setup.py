@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="wildtracker",                      # Your project name
+    name="wildlive",                      # Your project name
     version="0.1.0",                        # Initial version
     author="Ngoc Dat Nguyen",
     author_email="dat.nguyenngoc@bristol.ac.uk",
