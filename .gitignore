@@ -1,8 +1,8 @@
 yolov8s-seg.pt
 yolov8x-seg.pt
 yolov8n-seg.pt
-yolov11n.pt
-yolov11n-seg.pt
+yolo11n.pt
+yolo11n-seg.pt
 demo_data
 ultralytics
 jetson-inference
