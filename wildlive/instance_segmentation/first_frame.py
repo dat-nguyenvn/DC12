@@ -18,6 +18,8 @@ from wildlive.points_selection.apply_method import apply_processing
 from wildlive.visualization.visual import visual_image
 from wildlive.utils.convert import convert_process,convert_list_dict_to_dict
 from wildlive.utils.utils import generate_high_contrast_colors
+from wildlive.ultilkenya import check_live_info
+from wildlive.utils.remove import remove_intrack
 
 def init_detection(img,model_name):
 
@@ -176,7 +178,7 @@ def dict_id_center(tracking_list, in_points):
     return centers_dict,point_of_id_dict
 
 
-def process_boxes_complete_step_init(list_dict_info,tracking_list,points,wid,hei):
+def process_boxes_complete_step_init(list_dict_info,tracking_list,points,wid,hei,history_point):
 
     '''
     result: out put of sahi
@@ -237,8 +239,14 @@ def process_boxes_complete_step_init(list_dict_info,tracking_list,points,wid,hei
     
     #print("len(list_dict_info)",len(list_dict_info))
     list_dict_info=convert_list_dict_to_dict(list_dict_info)
+    rm_list=check_live_info().check_main_dict_by_id(list_dict_info)
+    list_dict_info_out=remove_intrack().remove_key_in_dict(list_dict_info,rm_list)
+    out_point,out_id_list,out_history=remove_intrack().apply_remove_first_step(rm_list,points,tracking_list,history_point)
+
+
+
     #print(list_dict_info.keys())
     #print("list_dict_info aaaaaaaaaaa",list_dict_info[2].keys())
     
     
-    return list_dict_info
+    return list_dict_info_out,out_point,out_id_list,out_history

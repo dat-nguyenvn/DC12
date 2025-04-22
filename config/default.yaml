@@ -1,12 +1,12 @@
 input_fordel_path: '/DC12/demo_data/eval/videos/DJI_0117_video1/frames/'
 #input_fordel_path: '/data/kenya/data_filter/video14/frames/'
 n_window: 1
-save_mot: '/mnt/wildlive_1window/'
+save_mot: './demo_data/'
 save_folder: './demo_data/demo2/'
 save_video_dir: './demo_data/demo_test.mp4'
 save_window_path: './demo_data/window/'
 model_detection: 'yolov8x-seg.pt'
-length_run: 300
+length_run: 20
 point_not_inmask: 200
 ecl_dis_match: 10
 thesshold_area_each_animal: 100
