@@ -9,7 +9,11 @@ from wildlive.utils.convert import convert_process
 from wildlive.utils.utils import compute_centroid,generate_high_contrast_colors,is_not_box_at_edge
 from wildlive.instance_segmentation.first_frame import dict_id_center
 
-
+animals_categories = {
+    20: "elephant",
+    22: "zebra",
+    23: "giraffe"
+}
 class update():
     def history_point_mask(self,points,history_points_in_mask,yolo_detector,center_window):
         
@@ -40,15 +44,16 @@ class update():
         #             history_points_in_mask[i] += 1
 
         return history_points_in_mask
-    def update_list_dict_info(self,list_dict_info,newid, bbox,groupid_center,list_tuple_five_points,conf,wid,hei,threshold_conf=0.8):
+    def update_list_dict_info(self,list_dict_info,newid, bbox,groupid_center,list_tuple_five_points,conf,wid,hei,class_num,threshold_conf=0.8):
         #use for new ID
         #dummy=box_at_edge(bbox,wid,hei)
+        class_category=animals_categories.get(class_num)
         if conf>threshold_conf:
             new_id_dict= {'image_id': newid,
                             'bbox': bbox, # [x,y,w,h]
                             'score': conf, #float
-                            'category_id': None, #int
-                            'category_name': None, #str
+                            'category_id': class_num, #int
+                            'category_name': class_category, #str
                             'segmentation': [],
                             'iscrowd': 0,
                             'area': 0,
@@ -69,8 +74,8 @@ class update():
             new_id_dict= {'image_id': newid,
                 'bbox': bbox, # [x,y,w,h]
                 'score': conf, #float
-                'category_id': None, #int
-                'category_name': 'zebra', #str
+                'category_id': class_num, #int
+                'category_name': class_category, #str
                 'segmentation': [],
                 'iscrowd': 0,
                 'area': 0,

@@ -143,6 +143,8 @@ class input_folder(videosourceprovider):
 
 #clastoutput
 def main():
+    #from jetson_utils import videoSource, videoOutput, Log
+
     input= rtsp_stream(rtsp_link="rtsp://192.168.144.25:8554/main.264")
 
     #input = videoSource("rtsp://192.168.144.25:8554/main.264", argv=sys.argv)    # default:  options={'width': 1280, 'height': 720, 'framerate': 30}

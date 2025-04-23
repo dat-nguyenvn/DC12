@@ -59,6 +59,10 @@ class add_points():
     def getnumpyimage_from_yolo(self,yolo_detector,box_target):
         window_np=yolo_detector[0].orig_img
         box=yolo_detector[0].boxes.xywh[box_target]
+        #todo class
+
+        class_ids = int(yolo_detector[0].boxes.cls.tolist()[box_target])
+
         x_center, y_center, width, height = box.cpu().numpy()
         x_min = int(x_center - width / 2)
         y_min = int(y_center - height / 2)
@@ -75,7 +79,7 @@ class add_points():
         #yolo_detector[0].masks
         mask = Polygon(yolo_detector[0].masks.xy[box_target])
 
-        return cropped_image,mask,x_min,y_min,x_center,y_center,width,height
+        return cropped_image,mask,x_min,y_min,x_center,y_center,width,height,class_ids
 
 
     def apply_add_process_new_id(self,rgb_image,imwid,imhei,dict_inside,matched_box,yolo_detector,centerwindow,featurecpu,trackinglist,history,thesshold_area_of_animal,threshold_conf=0.2):
@@ -83,7 +87,7 @@ class add_points():
         for idx,value in enumerate(matched_box):
             if value==0 and yolo_detector[0].boxes.conf.cpu().numpy()[idx]>threshold_conf :
                 conf=yolo_detector[0].boxes.conf.cpu().numpy()[idx]
-                image_np,polygon,minx,miny,xcen,ycen,wid,hei=self.getnumpyimage_from_yolo(yolo_detector,idx)
+                image_np,polygon,minx,miny,xcen,ycen,wid,hei,class_idx=self.getnumpyimage_from_yolo(yolo_detector,idx)
                 converted_box=convert_process().convert_bounding_boxes_to_big_frame(np.array([[minx, miny, wid, hei]]),centerwindow,(640,640))
                 unique_values = set(trackinglist)
                 dummy= check_box_overlap(converted_box[0],dict_inside,unique_values)
@@ -104,7 +108,7 @@ class add_points():
                         featurecpu=self.add_to_feature(featurecpu,five_points_in_full_frame)
                         history=self.add_to_history(history,5)
                         trackinglist=self.add_to_id_intrack(trackinglist,newid,5)
-                        dict_inside=update().update_list_dict_info(dict_inside,newid,[convert_minx_miny[0][0],convert_minx_miny[0][1],wid,hei],centroid,five_points_in_full_frame,conf,imwid,imhei)
+                        dict_inside=update().update_list_dict_info(dict_inside,newid,[convert_minx_miny[0][0],convert_minx_miny[0][1],wid,hei],centroid,five_points_in_full_frame,conf,imwid,imhei,class_num=class_idx)
 
 
 
@@ -116,7 +120,7 @@ class add_points():
             if value!=0:
                 if value in dictid_need_increase_point.keys():
 
-                    image_np,polygon,minx,miny,xcen,ycen,wid,hei=self.getnumpyimage_from_yolo(yolo_detector,idx)
+                    image_np,polygon,minx,miny,xcen,ycen,wid,hei,class_idx=self.getnumpyimage_from_yolo(yolo_detector,idx)
                     
                     #print("dictid_need_increase_point[value]^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",dictid_need_increase_point[value])
                     five_points=harris_selection_method().filter_some_points(image_np,polygon,minx,miny,number_point_per_animal=dictid_need_increase_point[value])
