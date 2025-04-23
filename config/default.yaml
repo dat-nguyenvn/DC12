@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 input_fordel_path: '/DC12/demo_data/DJI_0117_video3/frames/'
+=======
+input_fordel_path: '/DC12/demo_data/eval/videos/DJI_0117_video3/frames/'
+>>>>>>> 95cbc13122cbd5d42b46bd9f5c150bfe9cbeb9fd
 #input_fordel_path: '/data/kenya/data_filter/video14/frames/'
 n_window: 1
 save_mot: './demo_data/'

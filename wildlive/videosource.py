@@ -1,6 +1,5 @@
+#from jetson_utils import videoSource, videoOutput, Log
 import cv2  
-from jetson_utils import videoSource, videoOutput, Log
-
 import os
 import sys
 import numpy as np
@@ -21,8 +20,8 @@ class videosourceprovider:
             vid_name = [part for part in source_type.split("/") if part.startswith("DJI")][0]
             return vid_name
         else:
+            from jetson_utils import videoSource, videoOutput, Log
             return "Live_stream"
-
         
     def create_video_source(self, source_type):
         """
