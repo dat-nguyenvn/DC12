@@ -1,4 +1,4 @@
-input_fordel_path: '/DC12/demo_data/DJI_0117_video3/frames/'
+input_fordel_path: "camera"
 #input_fordel_path: '/data/kenya/data_filter/video14/frames/'
 n_window: 1
 save_mot: './demo_data/'

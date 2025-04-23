@@ -78,8 +78,9 @@ model =YOLO(config['model_detection']) # YOLO('yolov8n-seg.pt')
 sahimodel= config['model_detection'].split(".")[0]+".pt"
 save_folder_small='./demo_data/small/'
 save_mot=config['save_mot']
-video_name = [part for part in config['input_fordel_path'].split("/") if part.startswith("DJI")][0]
+#video_name = [part for part in config['input_fordel_path'].split("/") if part.startswith("DJI")][0]
 trim_model_name=config['model_detection'].split(".")[0]
+os.makedirs(save_folder, exist_ok=True)
 
 #DJI_0133_video1 : con huou
 #DJI_0601_video1
@@ -95,7 +96,7 @@ trim_model_name=config['model_detection'].split(".")[0]
 #inputsource= rtsp_stream(rtsp_link="rtsp://aaa:aaa@192.168.137.195:8554/streaming/live/1")
 print("config['input_fordel_path']",config['input_fordel_path'])
 inputsource= videosourceprovider(config['input_fordel_path'])
-
+video_name=inputsource.get_video_name(config['input_fordel_path'])
 w,h,c=inputsource.frame_size()
 im=inputsource.get_RGBframe_numpy()
 idFrame=inputsource.index()
