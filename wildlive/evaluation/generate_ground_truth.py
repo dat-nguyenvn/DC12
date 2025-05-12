@@ -4,9 +4,9 @@ import csv
 from natsort import natsorted
 # Define the folder path where your .json files are located
 #json_folder = '/media/ah23975/Crucial X9/captest/eval/frames/'  # Change this to your actual folder path
-json_folder = '/home/ah23975/mypc/2024/DC12/demo_data/eval/videos/DJI_0117_video3/boxid'  # Change this to your actual folder path
+json_folder = '/home/ah23975/mypc/2025/github/mount/DJI_small/boxid'  # Change this to your actual folder path
 
-output_csv_file = '/home/ah23975/mypc/2024/DC12/demo_data/eval/GT_MOT/DJI_0117_video3.csv'  # Output file for MOT format
+output_csv_file = '/home/ah23975/mypc/2025/github/DC12/demo_data/eval/GT_MOT/DJI_small.csv'  # Output file for MOT format
 
 # Function to convert the bounding box points to MOT format (xmin, ymin, width, height)
 def convert_to_bbox(points):

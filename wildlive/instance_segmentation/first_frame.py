@@ -21,7 +21,7 @@ from wildlive.utils.utils import generate_high_contrast_colors
 from wildlive.ultilkenya import check_live_info
 from wildlive.utils.remove import remove_intrack
 
-def init_detection(img,model_name):
+def init_detection(img,model_name,window_size):
 
     # input_fordel_path=input_path
     yolov8_seg_model_path = model_name
@@ -41,8 +41,8 @@ def init_detection(img,model_name):
     result = get_sliced_prediction(
         img,
         detection_model_seg,
-        slice_height = 640,
-        slice_width = 640,
+        slice_height = window_size,
+        slice_width = window_size,
         overlap_height_ratio = 0.2,
         overlap_width_ratio = 0.2)
     

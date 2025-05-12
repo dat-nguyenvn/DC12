@@ -78,10 +78,16 @@ model =YOLO(config['model_detection']) # YOLO('yolov8n-seg.pt')
 sahimodel= config['model_detection'].split(".")[0]+".pt"
 save_folder_small='./demo_data/small/'
 save_mot=config['save_mot']
+winsize=config['windowsize']
 #video_name = [part for part in config['input_fordel_path'].split("/") if part.startswith("DJI")][0]
 trim_model_name=config['model_detection'].split(".")[0]
 os.makedirs(save_folder, exist_ok=True)
-
+if torch.cuda.is_available():
+    print(f"Number of GPUs available: {torch.cuda.device_count()}")
+    for i in range(torch.cuda.device_count()):
+        print(f"GPU {i}: {torch.cuda.get_device_name(i)}")
+else:
+    print("CUDA is not available. No GPU detected.")
 #DJI_0133_video1 : con huou
 #DJI_0601_video1
 #DJI_0117_video4 herd
@@ -103,15 +109,15 @@ idFrame=inputsource.index()
 
 
 
-result_main=init_detection(im, sahimodel)
+result_main=init_detection(im, sahimodel,window_size=winsize)
 trackpoint_list_tuple,id_list_intrack,history_point_inmask,list_dict_info_main,show_image = process_first_frame(result_main)
 list_dict_info_main,trackpoint_list_tuple,id_list_intrack,history_point_inmask=process_boxes_complete_step_init(list_dict_info_main,id_list_intrack,trackpoint_list_tuple,w,h,history_point_inmask)
-
+#print("list_dict_info_main",list_dict_info_main)
 show_image=visual_image().draw_info_from_main_dict(show_image,list_dict_info_main)
 
 selector = StrategySelector()
 strategy = selector.get_strategy(n_window)
-center_window_list,border_center_point,salient_center_point=generate_centers().generate_tile_centers_border_and_salient(w,h)
+center_window_list,border_center_point,salient_center_point=generate_centers().generate_tile_centers_border_and_salient(w,h,tile_width=winsize,tile_height=winsize)
 predict_mot=[]
 remove_dict={}
 speed=[]
@@ -120,13 +126,15 @@ with vpi.Backend.CPU:
 points_np = np.array(trackpoint_list_tuple, dtype=np.float32)
 curFeatures = vpi.asarray(points_np)
 with vpi.Backend.CUDA:
-    optflow = vpi.OpticalFlowPyrLK(frame, curFeatures,5)
+    optflow = vpi.OpticalFlowPyrLK(frame, curFeatures, 4)
 
 while True:
     start_time = time.time()
-    line_mot=generate_to_mot_format(idFrame,list_dict_info_main,id_list_intrack)
-    predict_mot.append(line_mot)
+    #line_mot=generate_to_mot_format(idFrame,list_dict_info_main,id_list_intrack)
+    #predict_mot.append(line_mot)
     print(idFrame)
+    print(len(list_dict_info_main))
+
     prevFeatures = curFeatures
     cvFrame=inputsource.get_frame()
     if idFrame >= length_run:
@@ -135,7 +143,11 @@ while True:
     idFrame =inputsource.index()
     with vpi.Backend.CUDA:
         frame = vpi.asimage(cvFrame, vpi.Format.BGR8).convert(vpi.Format.U8)
+    print("id_list_intrack",set(id_list_intrack))
+    filtered_data = {k: list_dict_info_main[k] for k in set(id_list_intrack) if k in list_dict_info_main}
+    list_dict_info_main=filtered_data
     curFeatures, status = optflow(frame)
+
     list_of_tuples = [tuple(map(int, row)) for row in curFeatures.cpu().tolist()]
     rgb_image = cv2.cvtColor(cvFrame, cv2.COLOR_BGR2RGB)
 
@@ -147,16 +159,18 @@ while True:
     if len(idx_list_need_remove)>0:
         curFeatures, status,id_list_intrack,history_point_inmask=remove_intrack().apply_remove(idx_list_need_remove,curFeatures,status,id_list_intrack,history_point_inmask)       
         with vpi.Backend.CUDA:
-            optflow = vpi.OpticalFlowPyrLK(frame, curFeatures, 5)
+            optflow = vpi.OpticalFlowPyrLK(frame, curFeatures, 4)
+
+
 
     list_dict_info_main=reconstruct_process(show_image,list_dict_info_main,curFeatures.cpu(),id_list_intrack,w,h)
 
     center_crop,window_color=strategy.execute(idFrame,center_window_list,border_center_point,salient_center_point,[tuple(map(int, row)) for row in curFeatures.cpu().tolist()])
     
     
-    window_detection=crop_window(cvFrame,center_crop)
-
-    all_out_detector=model.predict(window_detection,show_boxes=True, save_crop=False ,show_labels=False,show_conf=False,save=False, classes=[20,22,23] ,conf=0.1,imgsz=(640,640))  # [20,22,23][0,1,2,3,5,7]
+    window_detection=crop_window(cvFrame,center_crop,window_size=winsize)
+    #print("window_detection",window_detection[0].shape)
+    all_out_detector=model.predict(window_detection,show_boxes=False, save_crop=False ,show_labels=False,show_conf=False,save=False, classes=[20,22,23] ,conf=0.5,imgsz=(640,640),device='cuda:0')  # [20,22,23][0,1,2,3,5,7]
 
     history_point_inmask = [x + 1 for x in history_point_inmask]
     
@@ -164,15 +178,15 @@ while True:
         box_id2=None
         out_detector=[all_out_detector[m]]
         if out_detector[0].masks!=None:            
-            poatabel=matching_module().poa_table(curFeatures.cpu(),out_detector,id_list_intrack,center_crop[m])
-            ioutable=matching_module().iou_table(list_dict_info_main,curFeatures.cpu(),out_detector,id_list_intrack,center_crop[m])
+            poatabel=matching_module().poa_table(curFeatures.cpu(),out_detector,id_list_intrack,center_crop[m],window_size=winsize)
+            ioutable=matching_module().iou_table(list_dict_info_main,curFeatures.cpu(),out_detector,id_list_intrack,center_crop[m],window_size=winsize)
             ioutable=matching_module().accumulate_lists(poatabel,ioutable)
 
             box_id2=matching_module().matching1(id_list_intrack,ioutable)
-            list_dict_info_main=update().step_accumulate(list_dict_info_main,out_detector,id_list_intrack,[tuple(map(int, row)) for row in curFeatures.cpu().tolist()],box_id2,center_crop[m],nwin=n_window)
+            list_dict_info_main=update().step_accumulate(list_dict_info_main,out_detector,id_list_intrack,[tuple(map(int, row)) for row in curFeatures.cpu().tolist()],box_id2,center_crop[m],nwin=n_window,window_size=winsize)
             
             
-            save_window=visual_image().draw_all_on_window(out_detector,box_id2,list_dict_info_main,curFeatures.cpu(),center_crop[m],id_list_intrack)
+            #save_window=visual_image().draw_all_on_window(out_detector,box_id2,list_dict_info_main,curFeatures.cpu(),center_crop[m],id_list_intrack)
 
             name="frame_"+str(idFrame)+".jpg"
             name_txt="frame_"+str(idFrame)+".txt"
@@ -180,20 +194,20 @@ while True:
             file_path_txt = os.path.join(save_window_path, name_txt)
 
 
-            history_point_inmask=check_live_info().find_point_not_in_mask(id_list_intrack,curFeatures.cpu(),box_id2,out_detector,center_crop[m],history_point=history_point_inmask) # remove points in belong to same object
+            history_point_inmask=check_live_info().find_point_not_in_mask(id_list_intrack,curFeatures.cpu(),box_id2,out_detector,center_crop[m],history_point=history_point_inmask,window_size=winsize) # remove points in belong to same object
             dict_id_need_increase_point=need_increase_point_for_id(id_list_intrack,box_id2)
             if len(dict_id_need_increase_point)>0:
-                list_dict_info_main,curFeatures,id_list_intrack,history_point_inmask=add_points().apply_add_process_need_more_points(dict_id_need_increase_point,show_image,list_dict_info_main,box_id2,out_detector,center_crop[m],curFeatures.cpu(),id_list_intrack,history_point_inmask)
+                list_dict_info_main,curFeatures,id_list_intrack,history_point_inmask=add_points().apply_add_process_need_more_points(dict_id_need_increase_point,show_image,list_dict_info_main,box_id2,out_detector,center_crop[m],curFeatures.cpu(),id_list_intrack,history_point_inmask,window_size=winsize)
                 with vpi.Backend.CUDA:
                     curFeatures=vpi.asarray(curFeatures)
-                    optflow = vpi.OpticalFlowPyrLK(frame, curFeatures, 5)
+                    optflow = vpi.OpticalFlowPyrLK(frame, curFeatures, 4)
 
             list_dict_info_main=update().step_update_detected_bbox_to_main_dict(list_dict_info_main,out_detector,id_list_intrack,[tuple(map(int, row)) for row in curFeatures.cpu().tolist()],box_id2,center_crop[m])
         if need_add_id_and_point(box_id2):
-            list_dict_info_main,curFeatures,id_list_intrack,history_point_inmask=add_points().apply_add_process_new_id(show_image,w,h,list_dict_info_main,box_id2,out_detector,center_crop[m],curFeatures.cpu(),id_list_intrack,history_point_inmask,thesshold_area_each_animal)
+            list_dict_info_main,curFeatures,id_list_intrack,history_point_inmask=add_points().apply_add_process_new_id(show_image,w,h,list_dict_info_main,box_id2,out_detector,center_crop[m],curFeatures.cpu(),id_list_intrack,history_point_inmask,thesshold_area_each_animal,window_size=winsize)
             with vpi.Backend.CUDA:
                 curFeatures=vpi.asarray(curFeatures)
-                optflow = vpi.OpticalFlowPyrLK(frame, curFeatures, 5)
+                optflow = vpi.OpticalFlowPyrLK(frame, curFeatures, 4)
 
 
     ##### END #####
@@ -205,15 +219,17 @@ while True:
     text_fps='FPS :' + str(fps)
     text_image_size= 'Resolution: '+ str(w) + 'x' + str(h) 
     print(f"Elapsed time: {elapsed_time:.5f} seconds")
-    show_end_image=visual_image().visual_bounding_box_of_dict(list_dict_info_main,rgb_image,id_list_intrack)
-    show_end_image=visual_image().draw_pixels_with_colors(show_end_image,curFeatures.cpu(),id_list_intrack,list_dict_info_main)
-    small_text_image=visual_image().visual_bounding_box_of_dict(list_dict_info_main,rgb_image,id_list_intrack,fontscale=1)
-    small_text_image=visual_image().draw_pixels_with_colors(small_text_image,curFeatures.cpu(),id_list_intrack,list_dict_info_main,radius=5)
-    show_end_image=visual_image().add_text_with_background(show_end_image,text_fps)
-    show_end_image=visual_image().add_text_with_background(show_end_image,text_image_size, position=(w-400,10) )
+
+
+    #show_end_image=visual_image().visual_bounding_box_of_dict(list_dict_info_main,rgb_image,id_list_intrack)
+    #show_end_image=visual_image().draw_pixels_with_colors(show_end_image,curFeatures.cpu(),id_list_intrack,list_dict_info_main)
+    # small_text_image=visual_image().visual_bounding_box_of_dict(list_dict_info_main,rgb_image,id_list_intrack,fontscale=1)
+    # small_text_image=visual_image().draw_pixels_with_colors(small_text_image,curFeatures.cpu(),id_list_intrack,list_dict_info_main,radius=5)
+    #show_end_image=visual_image().add_text_with_background(show_end_image,text_fps)
+    #show_end_image=visual_image().add_text_with_background(show_end_image,text_image_size, position=(w-400,10) )
     name="frame_"+str(idFrame)+".jpg"
     file_path = os.path.join(save_folder, name)
-    plt.imsave(file_path, show_end_image)
+    #plt.imsave(file_path, show_end_image)
     ################command ###########
 
 flattened_data = [item for sublist in predict_mot for item in sublist]
@@ -241,8 +257,8 @@ speed_df = pd.DataFrame(speed_data)
 speed_df.to_csv(speed_csv, index=True,header=True)
 
 print("Average speed",average)
-generate_video().create_video_from_images(save_folder,save_video_dir)
-print(f"Video saved: {save_video_dir}")
+#generate_video().create_video_from_images(save_folder,save_video_dir)
+#print(f"Video saved: {save_video_dir}")
 
 
 

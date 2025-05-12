@@ -1527,7 +1527,7 @@ class check_live_info():
         #print("outside_indices",outside_indices)
         return outside_indices
 
-    def find_point_not_in_mask(self,tracking_list,curFeaturescpu,match_box_id,yolo_detector,center_window,history_point,threshold_box_conf=0.8,step_jump_point_notin_mask=100):
+    def find_point_not_in_mask(self,tracking_list,curFeaturescpu,match_box_id,yolo_detector,center_window,history_point,window_size,threshold_box_conf=0.8,step_jump_point_notin_mask=100):
         remove_list=[]
         points_list=[tuple(map(int, row)) for row in curFeaturescpu.tolist()]
         unique_values = set(tracking_list)
@@ -1537,7 +1537,7 @@ class check_live_info():
                 if is_not_box_at_edge(box_yolo):
                     #idx
                     mask = Polygon(yolo_detector[0].masks.xy[idx])
-                    mask=convert_process().convert_polygon_window_to_full_frame(mask,center_window)
+                    mask=convert_process().convert_polygon_window_to_full_frame(mask,center_window,frame_size=window_size)
                     for index,p in enumerate (points_list):
                         shapely_point = Point(p)
                         if mask.contains(shapely_point) and tracking_list[index]!=value:

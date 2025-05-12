@@ -29,7 +29,7 @@ class matching_module():
 
         return poa_value,count
 
-    def poa_table(self,points,yolo_detector,tracking_list,center_window):
+    def poa_table(self,points,yolo_detector,tracking_list,center_window,window_size):
         #poa table: row ~ mask /
         # each row : value poa of group ID
 
@@ -56,7 +56,7 @@ class matching_module():
                 for mask_count in range (len(r.masks.xy)):
                     mask = Polygon(r.masks.xy[mask_count])
                     #mask_buffer = mask.buffer(distance=-5)
-                    mask=convert_process().convert_polygon_window_to_full_frame(mask,center_window)
+                    mask=convert_process().convert_polygon_window_to_full_frame(mask,center_window,frame_size=window_size)
 
                     poa_per_mask=[]
                     #mask to shapely
@@ -78,7 +78,7 @@ class matching_module():
 
         return poa_table
 
-    def iou_table(self,dict_inside,points,yolo_detector,tracking_list,center_window):
+    def iou_table(self,dict_inside,points,yolo_detector,tracking_list,center_window,window_size):
         #poa table: row ~ mask /
         # each row : value poa of group ID
 
@@ -106,7 +106,7 @@ class matching_module():
                     #mask = Polygon(r.masks.xy[mask_count])
                     box_yolo=yolo_detector[0].boxes.xywh.cpu().numpy()[box_count]
                     box_yolo=convert_process().convert_xywh_to_top_left(box_yolo)
-                    box_yolo=convert_process().convert_bounding_boxes_to_big_frame(box_yolo.reshape(1, 4),center_window,(640,640))[0]
+                    box_yolo=convert_process().convert_bounding_boxes_to_big_frame(box_yolo.reshape(1, 4),center_window,(window_size,window_size))[0]
 
 
 
@@ -213,13 +213,13 @@ class matching_module():
 
 
 
-    def matching2(self,match_box_id,tracking_list,yolo_detector,centercrop,featurecpu,threshold_ecl_dis_match=50):
+    def matching2(self,match_box_id,tracking_list,yolo_detector,centercrop,featurecpu,window_size,threshold_ecl_dis_match=50):
         #unmatched_bbox_list_idx=find_indices_unmatched1(match_box_id)
         #unique_values = set(tracking_list)
         exist_id=unique_id_not_in_matched_box(match_box_id,tracking_list)
         exist_id=list(set(tracking_list))
         list_tuple_center_of_box_position_in_window=center_of_box_detected(yolo_detector)
-        list_tuple_center_of_box_position_in_full_frame=convert_process().convert_point_window_to_full_frame(list_tuple_center_of_box_position_in_window,centercrop)
+        list_tuple_center_of_box_position_in_full_frame=convert_process().convert_point_window_to_full_frame(list_tuple_center_of_box_position_in_window,centercrop,window_size=window_size)
         points = [tuple(map(int, row)) for row in featurecpu.tolist()]
       
         #[0,5]

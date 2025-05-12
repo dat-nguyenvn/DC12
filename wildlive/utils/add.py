@@ -82,7 +82,7 @@ class add_points():
         return cropped_image,mask,x_min,y_min,x_center,y_center,width,height,class_ids
 
 
-    def apply_add_process_new_id(self,rgb_image,imwid,imhei,dict_inside,matched_box,yolo_detector,centerwindow,featurecpu,trackinglist,history,thesshold_area_of_animal,threshold_conf=0.2):
+    def apply_add_process_new_id(self,rgb_image,imwid,imhei,dict_inside,matched_box,yolo_detector,centerwindow,featurecpu,trackinglist,history,thesshold_area_of_animal,window_size,threshold_conf=0.2):
         
         for idx,value in enumerate(matched_box):
             if value==0 and yolo_detector[0].boxes.conf.cpu().numpy()[idx]>threshold_conf :
@@ -94,14 +94,18 @@ class add_points():
                 five_points=harris_selection_method().filter_some_points(image_np,polygon,minx,miny)
 
                 if len(five_points)>0 and wid * hei>thesshold_area_of_animal and dummy:
+                #if len(five_points)>0 and dummy:
                     five_points_in_window=convert_process().convert_points_box_to_full_frame(five_points,minx,miny)
-                    five_points_in_full_frame=convert_process().convert_point_window_to_full_frame(five_points_in_window,centerwindow)
-                    convert_minx_miny=convert_process().convert_point_window_to_full_frame([(minx,miny)],centerwindow)
+                    five_points_in_full_frame=convert_process().convert_point_window_to_full_frame(five_points_in_window,centerwindow,window_size=window_size)
+                    convert_minx_miny=convert_process().convert_point_window_to_full_frame([(minx,miny)],centerwindow,window_size=window_size)
                     dummy2=box_at_edge([convert_minx_miny[0][0],convert_minx_miny[0][1],wid,hei],imwid,imhei)
                     if not dummy2:
 
-                        number_id_exist=len(dict_inside)
-                        newid=number_id_exist+1
+                        # number_id_exist=len(dict_inside)
+                        # newid=number_id_exist+1
+                        #print("dict_inside",dict_inside.get)
+                        max_key = max(dict_inside)
+                        newid=max_key+1
 
                         centroid=compute_centroid(five_points_in_full_frame)
 
@@ -114,7 +118,7 @@ class add_points():
 
         return dict_inside,featurecpu,trackinglist,history
 
-    def apply_add_process_need_more_points(self,dictid_need_increase_point,rgb_image,dict_inside,matched_box,yolo_detector,centerwindow,featurecpu,trackinglist,history):
+    def apply_add_process_need_more_points(self,dictid_need_increase_point,rgb_image,dict_inside,matched_box,yolo_detector,centerwindow,featurecpu,trackinglist,history,window_size):
 
         for idx,value in enumerate(matched_box):
             if value!=0:
@@ -126,8 +130,8 @@ class add_points():
                     five_points=harris_selection_method().filter_some_points(image_np,polygon,minx,miny,number_point_per_animal=dictid_need_increase_point[value])
                     if len(five_points)>0:
                         five_points_in_window=convert_process().convert_points_box_to_full_frame(five_points,minx,miny)
-                        five_points_in_full_frame=convert_process().convert_point_window_to_full_frame(five_points_in_window,centerwindow)
-                        convert_minx_miny=convert_process().convert_point_window_to_full_frame([(minx,miny)],centerwindow)
+                        five_points_in_full_frame=convert_process().convert_point_window_to_full_frame(five_points_in_window,centerwindow,window_size=window_size)
+                        convert_minx_miny=convert_process().convert_point_window_to_full_frame([(minx,miny)],centerwindow,window_size=window_size)
                         #number_id_exist=len(dict_inside)
                         id_need_add=value
 

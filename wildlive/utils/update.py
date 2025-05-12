@@ -96,7 +96,7 @@ class update():
         return list_dict_info
 
 
-    def step_accumulate(self,dict_inside,yolo_detector,tracking_list,points,match_box_id,center_window,nwin,threshold_box_conf=0.8):
+    def step_accumulate(self,dict_inside,yolo_detector,tracking_list,points,match_box_id,center_window,nwin,window_size,threshold_box_conf=0.8):
         if nwin == 1 or nwin == 2:
             athres=1
 
@@ -113,7 +113,7 @@ class update():
                 #print("box_yolo",box_yolo.shape)
                 box_yolo=convert_process().convert_xywh_to_top_left(box_yolo)
 
-                box_yolo=convert_process().convert_bounding_boxes_to_big_frame(box_yolo.reshape(1, 4),center_window,(640,640))[0]
+                box_yolo=convert_process().convert_bounding_boxes_to_big_frame(box_yolo.reshape(1, 4),center_window,(window_size,window_size))[0]
                 #print("box_yolo ************* ",box_yolo)
 
                 dict_inside[value]['visible']=True
@@ -148,7 +148,8 @@ class update():
             if value!=0 and yolo_detector[0].boxes.conf.cpu().numpy()[idx]>threshold_box_conf:
                 #print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
                 box_yolo=yolo_detector[0].boxes.xywh.cpu().numpy()[idx]
-                if is_not_box_at_edge(box_yolo):
+                #if is_not_box_at_edge(box_yolo):
+                if True:
                     box_yolo=convert_process().convert_xywh_to_top_left(box_yolo)
                     box_yolo=convert_process().convert_bounding_boxes_to_big_frame(box_yolo.reshape(1, 4),center_window,(640,640))[0]
                     dict_inside[value]['bbox']=box_yolo
