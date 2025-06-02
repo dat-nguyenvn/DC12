@@ -21,21 +21,13 @@ git clone --recurse-submodules git@github.com:dat-nguyenvn/DC12.git
 ```bash
 docker pull nvcr.io/nvidia/pytorch:23.12-py3
 xhost +local:docker
-docker run --gpus all -it --privileged --ipc=host --ulimit memlock=-1 \
+docker run --gpus all --rm -it --privileged --ipc=host --ulimit memlock=-1 \
  -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=$DISPLAY\
  -v /tmp/.docker.xauth:/tmp/.docker.xauth\
  -e XAUTHORITY=/tmp/.docker.xauth\
- -v /home/boss/mypc/phd/DC12:/DC12\
- -v /home/boss/mypc/mount:/mount\
- --name envgit 1cff6923bda0
+ -v /home/ah23975/mypc/2025/github/DC12:/DC12\
+ --name wildlive nvcr.io/nvidia/pytorch:23.12-py3
 
-docker run --gpus all -it --privileged --ipc=host --ulimit memlock=-1 \
- -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=$DISPLAY\
- -v /tmp/.docker.xauth:/tmp/.docker.xauth\
- -e XAUTHORITY=/tmp/.docker.xauth\
- -v /home/boss/mypc/phd/DC12:/DC12\
- -v /home/boss/mypc/mount:/mount\
- --name envgit  1cff6923bda0
 ```
 * Replace `/home/boss/mypc/phd/DC12` to your **DC12 directory**
 
