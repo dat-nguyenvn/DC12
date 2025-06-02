@@ -1,6 +1,6 @@
 ![Alt text](images/title.png)
 ### About the Project:
-We have developed an ultra-fast tracking method specifically designed for drones, with applications in wildlife monitoring and conservation. . The software is compatible with the Jetson Orin AGX and is integrated directly into the drone to enable real-time use of advanced deep learning models. This system delivers dynamic, autonomous tracking, offering conservation scientists a smart and efficient alternative to traditional camera trap technology. The research is part of [WildDrone project](https://wilddrone.eu/)
+We have developed an ultra-fast tracking method specifically designed for drones, with applications in wildlife monitoring and conservation. The software is compatible with the Jetson Orin AGX and is integrated directly into the drone to enable real-time use of advanced deep learning models. This system delivers dynamic, autonomous tracking, offering conservation scientists a smart and efficient alternative to traditional camera trap technology. The research is part of [WildDrone project](https://wilddrone.eu/)
 The code is the official implementation of the [*WildLive*](https://arxiv.org/abs/2504.10165)
 
 ## Table of Contents
