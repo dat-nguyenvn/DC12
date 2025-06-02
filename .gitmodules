@@ -1,6 +1,6 @@
 [submodule "ultralytics"]
 	path = ultralytics
-	url = https://github.com/ultralytics/ultralytics.git
+	url = git@github.com:dat-nguyenvn/ultralytics.git
 [submodule "jetson-inference"]
 	path = jetson-inference
 	url = https://github.com/dusty-nv/jetson-inference.git
