@@ -137,8 +137,8 @@ def process_first_frame(result):
 
     show_image=visual_image().visualize_points_on_image(rgbarray,trackpoint_LK)
     
-    plt.imshow(show_image)
-    plt.show()
+    #plt.imshow(show_image)
+    #plt.show()
     print("Done process_first_frame")
     return trackpoint_LK,id_list_intrack,history_points_tracked_list,dict_filtered,show_image
 

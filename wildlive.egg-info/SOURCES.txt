@@ -23,6 +23,7 @@ wildlive/utils/add.py
 wildlive/utils/capture.py
 wildlive/utils/convert.py
 wildlive/utils/crop.py
+wildlive/utils/downsample.py
 wildlive/utils/label.py
 wildlive/utils/remove.py
 wildlive/utils/samplebatch.py

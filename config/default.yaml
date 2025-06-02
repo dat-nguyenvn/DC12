@@ -1,9 +1,9 @@
 #input_fordel_path: '/DC12/demo_data/eval/videos/DJI_0117_video3/frames/'
-input_fordel_path: '/mount/DJI_0117_video3/frame2k/'
+input_fordel_path: '/DC12/data/DJI_0117_video3_sample/frames/'
 #input_fordel_path: '/data/kenya/data_filter/video14/frames/'
 n_window: 1
 save_mot: './demo_data/'
-save_folder: './demo_data/demo320/'
+save_folder: './demo_data/demo/'
 save_video_dir: './demo_data/demo_test.mp4'
 save_window_path: './demo_data/window/'
 model_detection: 'yolov8x-seg.pt'
@@ -11,5 +11,5 @@ length_run: 0
 point_not_inmask: 200
 ecl_dis_match: 10
 thesshold_area_each_animal: 100
-windowsize: 160
+windowsize: 640
 #input_fordel_path: '/data/captest/cap_eval_data/vlc-record-2025-01-03-14h37m50s-DJI_20240624153820_0001_V/frames'

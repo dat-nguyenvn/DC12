@@ -221,20 +221,21 @@ while True:
     print(f"Elapsed time: {elapsed_time:.5f} seconds")
 
 
-    #show_end_image=visual_image().visual_bounding_box_of_dict(list_dict_info_main,rgb_image,id_list_intrack)
-    #show_end_image=visual_image().draw_pixels_with_colors(show_end_image,curFeatures.cpu(),id_list_intrack,list_dict_info_main)
+    show_end_image=visual_image().visual_bounding_box_of_dict(list_dict_info_main,rgb_image,id_list_intrack)
+    show_end_image=visual_image().draw_pixels_with_colors(show_end_image,curFeatures.cpu(),id_list_intrack,list_dict_info_main)
     # small_text_image=visual_image().visual_bounding_box_of_dict(list_dict_info_main,rgb_image,id_list_intrack,fontscale=1)
     # small_text_image=visual_image().draw_pixels_with_colors(small_text_image,curFeatures.cpu(),id_list_intrack,list_dict_info_main,radius=5)
-    #show_end_image=visual_image().add_text_with_background(show_end_image,text_fps)
-    #show_end_image=visual_image().add_text_with_background(show_end_image,text_image_size, position=(w-400,10) )
+    show_end_image=visual_image().add_text_with_background(show_end_image,text_fps)
+    show_end_image=visual_image().add_text_with_background(show_end_image,text_image_size, position=(w-400,10) )
     name="frame_"+str(idFrame)+".jpg"
     file_path = os.path.join(save_folder, name)
-    #plt.imsave(file_path, show_end_image)
+    plt.imsave(file_path, show_end_image)
+    print("Output frame save:",file_path)
     ################command ###########
 
 flattened_data = [item for sublist in predict_mot for item in sublist]
 csv_filename = save_mot +video_name+'.csv'
-print("csv directory",csv_filename)
+print("Output file directory in MOT format ",csv_filename)
 os.makedirs(save_mot, exist_ok=True)
 
 mot_df = pd.DataFrame(flattened_data, columns=["frame", "id", "x", "y", "w", "h", "confidence", "class_id","abc","bcd"])
@@ -257,8 +258,8 @@ speed_df = pd.DataFrame(speed_data)
 speed_df.to_csv(speed_csv, index=True,header=True)
 
 print("Average speed",average)
-#generate_video().create_video_from_images(save_folder,save_video_dir)
-#print(f"Video saved: {save_video_dir}")
+print("Output file directory in MOT format at",csv_filename)
+generate_video().create_video_from_images(save_folder,save_video_dir)
 
 
 
