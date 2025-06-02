@@ -24,3 +24,8 @@ class generate_video():
                 writer.append_data(image)
 
         print(f"Video created: {video_name}")
+
+if __name__ == "__main__":
+    gv = generate_video()
+    gv.create_video_from_images("/home/ah23975/mypc/2025/papergraphic/DJI_20230719145816_0003_V_video2/outputs/", "/home/ah23975/mypc/2025/papergraphic/DJI_20230719145816_0003_V_video2/output_video.mp4")
+
