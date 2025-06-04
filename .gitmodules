@@ -8,3 +8,7 @@
 [submodule "sahi"]
 	path = sahi
 	url = git@github.com:dat-nguyenvn/sahifilter.git
+
+[submodule "SAHI-SAM2"]
+	path = SAHI-SAM2
+	url = git@github.com:dat-nguyenvn/SAHI-SAM2.git

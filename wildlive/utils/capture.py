@@ -3,7 +3,7 @@ import os
 import imageio.v3 as iio
 import argparse
 
-def extract_frames(video_path, output_folder,distance=50):
+def extract_frames(video_path, output_folder,distance=200):
     # Create a folder with the same name as the video file
     video_name = os.path.basename(video_path)
     frame_folder = os.path.join(output_folder, video_name.split('.')[0],'cutoff_frames')
@@ -52,18 +52,18 @@ def extract_all_frames(video_path, output_folder):
 
 def main():
     parser = argparse.ArgumentParser(description='Extract frames from a video.')
-    parser.add_argument('--video_folder',default='/data/captest/evaluation_data/', help='Path to the video file',)
-    parser.add_argument('--output_folder', default='data/captest/cap_eval_data/', help='Path to the output folder (default: current directory)',)
+    parser.add_argument('--video_folder',default='/media/ah23975/Data/tinyvideo', help='Path to the video file',)
+    parser.add_argument('--output_folder', default='/media/ah23975/Data/tinyvideo/capture', help='Path to the output folder (default: current directory)',)
     args = parser.parse_args()
 
     # List all video files in the folder
-    video_files = [f for f in os.listdir(args.video_folder) if f.endswith(('.mp4', '.avi', '.mov', '.wmv'))]
+    video_files = [f for f in os.listdir(args.video_folder) if f.endswith(('.mp4', '.avi', '.mov', '.wmv','.MP4'))]
 
     # Extract frames from each video file
     for video_file in video_files:
         video_path = os.path.join(args.video_folder, video_file)
-        extract_all_frames(video_path, args.output_folder)
-        #extract_frames(video_path, args.output_folder)
+        #extract_all_frames(video_path, args.output_folder)
+        extract_frames(video_path, args.output_folder)
 
 if __name__ == '__main__':
     main()
