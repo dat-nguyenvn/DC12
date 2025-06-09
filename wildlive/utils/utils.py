@@ -7,7 +7,54 @@ def need_add_id_and_point(matched_box): #todo: add to check class
             return True
     else:
         return False
+def iou_calulation(box1, box2, format="topleft"):
+    """
+    Compute the Intersection over Union (IoU) of two bounding boxes.
 
+    :param box1: List [x, y, w, h], either center-based or top-left format.
+    :param box2: List [x, y, w, h], either center-based or top-left format.
+    :param format: Specify the format of the boxes, "center" or "topleft".
+    :return: IoU value
+    """
+    if format == "center":
+        # Convert from center to top-left format
+        x1_min = box1[0] - box1[2] / 2
+        y1_min = box1[1] - box1[3] / 2
+        x1_max = box1[0] + box1[2] / 2
+        y1_max = box1[1] + box1[3] / 2
+
+        x2_min = box2[0] - box2[2] / 2
+        y2_min = box2[1] - box2[3] / 2
+        x2_max = box2[0] + box2[2] / 2
+        y2_max = box2[1] + box2[3] / 2
+
+    elif format == "topleft":
+        # Use as is for top-left format
+        x1_min, y1_min, x1_max, y1_max = box1[0], box1[1], box1[0] + box1[2], box1[1] + box1[3]
+        x2_min, y2_min, x2_max, y2_max = box2[0], box2[1], box2[0] + box2[2], box2[1] + box2[3]
+    else:
+        raise ValueError("Invalid format. Use 'center' or 'topleft'.")
+
+    # Compute the coordinates of the intersection rectangle
+    inter_x_min = max(x1_min, x2_min)
+    inter_y_min = max(y1_min, y2_min)
+    inter_x_max = min(x1_max, x2_max)
+    inter_y_max = min(y1_max, y2_max)
+
+    # Compute area of intersection
+    inter_width = max(0, inter_x_max - inter_x_min)
+    inter_height = max(0, inter_y_max - inter_y_min)
+    intersection_area = inter_width * inter_height
+
+    # Compute area of both bounding boxes
+    area1 = (x1_max - x1_min) * (y1_max - y1_min)
+    area2 = (x2_max - x2_min) * (y2_max - y2_min)
+
+    # Compute area of union
+    union_area = area1 + area2 - intersection_area
+
+    # Compute IoU
+    return intersection_area / union_area if union_area > 0 else 0
 
 def need_increase_point_for_id (tracking_list, matched_box,point_per_animal=5):
     id_matched=set(matched_box)
@@ -58,12 +105,13 @@ def check_box_overlap(input_box, dict_data,uniqueid_intrack,threshold=0.5):
         
         bbox = dict_data[key]['bbox']
         iou = calculate_modified_iou(input_box, bbox)
+        #iou = iou_calulation(input_box, bbox)
 
         # If any IoU exceeds the threshold, return False immediately
         if iou > threshold:
             return False
 
-    # If no overlap exceeded the threshold, return True
+    # If no overlap exceeded the threshold, return Trues
     return True
 
 
@@ -159,3 +207,29 @@ def generate_high_contrast_colors():
 def load_config(config_path):
     with open(config_path, 'r') as file:
         return yaml.safe_load(file)
+    
+
+def find_positions_multiple_values(main_list, values_to_find):
+    """
+    Finds all positions (indices) of any value from a given set of values in a list.
+
+    Args:
+        main_list (list): The list to search within.
+        values_to_find (list or single value): A single value or a list of values
+                                               whose positions are to be found.
+
+    Returns:
+        list: A list of indices where any of the values_to_find are found,
+              sorted in ascending order of index.
+    """
+    positions = []
+    # Ensure values_to_find is an iterable (e.g., convert single value to a list)
+    if not isinstance(values_to_find, (list, tuple, set)):
+        values_to_find = [values_to_find]
+
+    values_set = set(values_to_find) # Use a set for faster lookup
+
+    for index, item in enumerate(main_list):
+        if item in values_set:
+            positions.append(index)
+    return positions

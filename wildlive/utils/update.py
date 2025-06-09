@@ -96,9 +96,9 @@ class update():
         return list_dict_info
 
 
-    def step_accumulate(self,dict_inside,yolo_detector,tracking_list,points,match_box_id,center_window,nwin,window_size,threshold_box_conf=0.8):
+    def step_accumulate(self,dict_inside,yolo_detector,tracking_list,points,match_box_id,center_window,nwin,window_size,threshold_box_conf=0.5):
         if nwin == 1 or nwin == 2:
-            athres=1
+            athres=2
 
         if nwin == 4 or nwin == 8:
             athres= 4
@@ -148,8 +148,8 @@ class update():
             if value!=0 and yolo_detector[0].boxes.conf.cpu().numpy()[idx]>threshold_box_conf:
                 #print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
                 box_yolo=yolo_detector[0].boxes.xywh.cpu().numpy()[idx]
-                #if is_not_box_at_edge(box_yolo):
-                if True:
+                if is_not_box_at_edge(box_yolo):
+                #if True:
                     box_yolo=convert_process().convert_xywh_to_top_left(box_yolo)
                     box_yolo=convert_process().convert_bounding_boxes_to_big_frame(box_yolo.reshape(1, 4),center_window,(640,640))[0]
                     dict_inside[value]['bbox']=box_yolo
@@ -174,7 +174,7 @@ class update():
     def decrease_score_step(self,inside_dict):
         for key, value in inside_dict.items():
             if 'score' in value:  # Check if 'score' exists
-                value['score'] -= 0.1
+                value['score'] -= 0.01
 
         return inside_dict
 
@@ -252,3 +252,180 @@ def update_bounding_box(center_points_t0, points_t1, box_t):
     # Return the new bounding box with the same width and height
     return [new_x_center, new_y_center, w, h],(shift_x,shift_y)
     
+class CheckInfoDict():
+    """
+    A class to filter and process a dictionary of tracking information.
+    """
+
+    def __init__(self):
+        """
+        Initializes the CheckInfoDict class.
+        """
+        pass
+
+    def _calculate_modified_iou(self,box1, box2):
+        # Extract top-left corner and width/height for both boxes
+        x1_1, y1_1, w1, h1 = box1  # Box 1
+        x1_2, y1_2, w2, h2 = box2  # Box 2
+        
+        # Calculate the bottom-right corner for both boxes
+        x2_1 = x1_1 + w1
+        y2_1 = y1_1 + h1
+        
+        x2_2 = x1_2 + w2
+        y2_2 = y1_2 + h2
+        
+        # Calculate the area of intersection
+        inter_x1 = max(x1_1, x1_2)
+        inter_y1 = max(y1_1, y1_2)
+        inter_x2 = min(x2_1, x2_2)
+        inter_y2 = min(y2_1, y2_2)
+
+        # If there's no intersection, return IoU as 0
+        if inter_x1 >= inter_x2 or inter_y1 >= inter_y2:
+            return 0.0
+
+        inter_area = (inter_x2 - inter_x1) * (inter_y2 - inter_y1)
+
+        # Calculate the area of each box
+        area_1 = w1 * h1
+        area_2 = w2 * h2
+
+        # Calculate the minimum area of the two boxes
+        min_area = min(area_1, area_2)
+
+        # Calculate the Modified IoU
+        modified_iou = inter_area / min_area
+        return modified_iou
+
+
+    def _calculate_iou(self, box1, box2):
+        """
+        Calculates the Intersection over Union (IoU) of two bounding boxes.
+        Boxes are in [x, y, w, h] format.
+        """
+        # Convert boxes from [x, y, w, h] to [x1, y1, x2, y2]
+        x1_1, y1_1, w1, h1 = box1
+        x2_1, y2_1 = x1_1 + w1, y1_1 + h1
+
+        x1_2, y1_2, w2, h2 = box2
+        x2_2, y2_2 = x1_2 + w2, y1_2 + h2
+
+        # Determine the coordinates of the intersection rectangle
+        inter_x1 = max(x1_1, x1_2)
+        inter_y1 = max(y1_1, y1_2)
+        inter_x2 = min(x2_1, x2_2)
+        inter_y2 = min(y2_1, y2_2)
+
+        # Calculate the area of the intersection rectangle
+        inter_width = max(0, inter_x2 - inter_x1)
+        inter_height = max(0, inter_y2 - inter_y1)
+        intersection_area = inter_width * inter_height
+
+        # Calculate the area of both bounding boxes
+        box1_area = w1 * h1
+        box2_area = w2 * h2
+
+        # Calculate the union area
+        union_area = box1_area + box2_area - intersection_area
+
+        # Handle the case where union_area is zero to avoid division by zero
+        if union_area == 0:
+            return 0.0
+
+        return intersection_area / union_area
+
+    def _filter_by_id(self, data_dict, id_list_intrack):
+        """
+        Filter 1: Filters the main dictionary to include only items whose keys
+        (image_ids) are present in the id_list_intrack.
+
+        Args:
+            data_dict (dict): The main dictionary containing tracking info.
+            id_list_intrack (list): A list of image_ids that are currently in track.
+
+        Returns:
+            dict: A new dictionary containing only the filtered items.
+        """
+        # Using a dictionary comprehension to create a new filtered dictionary
+        filtered_data = {k: data_dict[k] for k in id_list_intrack if k in data_dict}
+        return filtered_data
+
+    def _filter_overlapping_boxes(self, data_dict, iou_threshold=0.95):
+        """
+        Filter 2: Identifies and removes entries from the dictionary where bounding
+        boxes overlap by more than a specified IoU threshold.
+        When overlap occurs, the entry with the lower 'score' is removed.
+
+        Args:
+            data_dict (dict): The dictionary of tracking information (e.g., output from filter1).
+                              This dictionary will be modified in-place if items are removed.
+            iou_threshold (float): The Intersection over Union (IoU) threshold.
+                                   If IoU > this, one of the overlapping boxes is removed.
+
+        Returns:
+            dict: A new dictionary with overlapping boxes removed.
+        """
+        # Create a list of (id, bbox, score) tuples to easily iterate and compare
+        # Using list() to create a copy of items to avoid issues while modifying dict
+        items_to_check = list(data_dict.items())
+        ids_to_remove = set()
+
+        # Iterate through all unique pairs of items
+        for i in range(len(items_to_check)):
+            id_i, info_i = items_to_check[i]
+            bbox_i = info_i['bbox']
+            score_i = info_i['score']
+
+            if id_i in ids_to_remove: # Skip if this item is already marked for removal
+                continue
+
+            for j in range(i + 1, len(items_to_check)):
+                id_j, info_j = items_to_check[j]
+                bbox_j = info_j['bbox']
+                score_j = info_j['score']
+
+                if id_j in ids_to_remove: # Skip if this item is already marked for removal
+                    continue
+
+                iou = self._calculate_modified_iou(bbox_i, bbox_j)
+
+                if iou > iou_threshold:
+                    # Overlap detected, decide which one to remove
+                    if score_i < score_j and score_i <0.4 :
+                        ids_to_remove.add(id_i)
+                        break # No need to compare id_i with other boxes if it's being removed
+                    if score_j <= score_i and score_j <0.4 : # score_j <= score_i (including equal scores, remove id_j)
+                        ids_to_remove.add(id_j)
+
+        # Create a new dictionary without the marked-for-removal IDs
+        filtered_data = {k: v for k, v in data_dict.items() if k not in ids_to_remove}
+        return filtered_data,ids_to_remove
+
+    def apply(self, list_dict_info_main, id_list_intrack):
+        """
+        Applies filter1 and filter2 to the tracking information.
+
+        Args:
+            list_dict_info_main (dict): The main dictionary where all tracking data is stored.
+            id_list_intrack (list): A list of image_ids that are currently in track.
+
+        Returns:
+            dict: The final dictionary after applying both filters.
+        """
+        print(f"Initial items in list_dict_info_main: {len(list_dict_info_main)}")
+        print(f"IDs in id_list_intrack: {len(id_list_intrack)}")
+
+        # --- Apply Filter 1 ---
+        # Filters to keep only items whose IDs are in id_list_intrack
+        print("\nApplying Filter 1: Filtering by in-track IDs...")
+        data_after_filter1 = self._filter_by_id(list_dict_info_main, id_list_intrack)
+        print(f"Items after Filter 1: {len(data_after_filter1)}")
+
+        # --- Apply Filter 2 ---
+        # Removes overlapping bounding boxes, keeping the one with the higher score
+        print("\nApplying Filter 2: Removing overlapping boxes (IoU > 0.5)...")
+        final_filtered_data,ids_to_remove = self._filter_overlapping_boxes(data_after_filter1, iou_threshold=0.5)
+        print(f"Items after Filter 2: {len(final_filtered_data)}")
+
+        return final_filtered_data,ids_to_remove

@@ -83,7 +83,8 @@ class matching_module():
         # each row : value poa of group ID
 
         unique_values = set(tracking_list)
-        
+        print("unique_values",unique_values)
+
         # Get the number of unique values
         number_unique_id = len(unique_values)
         #print("number_unique_id",number_unique_id)
@@ -116,6 +117,8 @@ class matching_module():
                     for unique in unique_values:
                         indices_of_unique = np.where(np.array(tracking_list) == unique)[0].tolist()
                         point_of_one_id=[tuple(points[i]) for i in indices_of_unique]
+                        print("dict_inside",dict_inside.keys())
+                        print("unique",unique)
                         pre_box=dict_inside[unique]['bbox']
                         iou_value=iou(pre_box,box_yolo) 
 
@@ -159,7 +162,7 @@ class matching_module():
                 #  la tim vi tri dau tien cua gia tri max, \
                 # neu co 2 index = nhau co loi nhe
                 #todo check heare
-                if poa_per_mask[best_match_index]>=0.1 : 
+                if poa_per_mask[best_match_index]>=0.5: 
                     match_box_id[idx_mask]=unique_values[best_match_index]
 
 
@@ -178,7 +181,7 @@ class matching_module():
             raise ValueError("Both lists must have the same dimensions.")
         
         # Add corresponding elements
-        return [[v1 + v2 for v1, v2 in zip(row1, row2)] for row1, row2 in zip(list1, list2)]
+        return [[v1 + 0.5*v2 for v1, v2 in zip(row1, row2)] for row1, row2 in zip(list1, list2)]
 
     def filter_poa_table (self,tracking_list,poa_table): # remove points in belong to same object
         #poa_table=self.poa_table

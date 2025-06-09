@@ -1478,8 +1478,8 @@ class check_live_info():
         idx_list_need_remove=[]
         idx_list_need_remove=self.check_status(sta,idx_list_need_remove)
         idx_list_need_remove=self.check_history(history_point,idx_list_need_remove,threshold_point_not_inmask)
-        out_point=self.check_point_not_in_bbox(cur_point,ID_list,dict_inside)
-        idx_list_need_remove.extend(out_point)
+        #out_point=self.check_point_not_in_bbox(cur_point,ID_list,dict_inside)
+        #idx_list_need_remove.extend(out_point)
         return idx_list_need_remove
     
     def check_point_not_in_bbox(self,cur_point, ID_list, dict_inside):
@@ -1527,7 +1527,7 @@ class check_live_info():
         #print("outside_indices",outside_indices)
         return outside_indices
 
-    def find_point_not_in_mask(self,tracking_list,curFeaturescpu,match_box_id,yolo_detector,center_window,history_point,window_size,threshold_box_conf=0.8,step_jump_point_notin_mask=100):
+    def find_point_not_in_mask(self,tracking_list,curFeaturescpu,match_box_id,yolo_detector,center_window,history_point,window_size,threshold_box_conf=0.8,step_jump_point_notin_mask=50):
         remove_list=[]
         points_list=[tuple(map(int, row)) for row in curFeaturescpu.tolist()]
         unique_values = set(tracking_list)

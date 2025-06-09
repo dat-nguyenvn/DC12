@@ -38,7 +38,7 @@ class visual_image():
         plt.imshow(numpy_image)
         plt.show()
 
-    def visualize_points_on_image(self,image_np, points, color=(0, 0, 255), radius=5, thickness=-1):
+    def visualize_points_on_image(self,image_np, points, color=(0, 0, 255), radius=10, thickness=-1):
         """
         Visualizes points on an image by drawing circles at each point.
 
@@ -149,7 +149,7 @@ class visual_image():
 
         return np_image
 
-    def draw_one_id_on_image(self,image, bbox, image_id, color,conf='0',class_name='',thickness=2,font_scale = 1):
+    def draw_one_id_on_image(self,image, bbox, image_id, color,conf='0',class_name='',thickness=3,font_scale = 1):
         """
         Draw a bounding box with a label on the image.
         Args:
@@ -183,7 +183,7 @@ class visual_image():
         # Draw text (image_id)
         cv2.putText(image, text, (text_x, text_y), font, font_scale, color, font_thickness)
         return image
-    def visual_bounding_box_of_dict(self,dict_inside,np_image,tracking_list,fontscale=1):
+    def visual_bounding_box_of_dict(self,dict_inside,np_image,tracking_list,fontscale=1.5):
 
         unique_values = set(tracking_list)
         #print("unique_values in reconstruct ",unique_values)
@@ -217,7 +217,7 @@ class visual_image():
 
 
         return out_img
-    def draw_pixels_with_colors(self,np_image, featurecpu, id_list_intrack, new_id_dict_list,radius=2):
+    def draw_pixels_with_colors(self,np_image, featurecpu, id_list_intrack, new_id_dict_list,radius=5):
         """
         Draws pixels on the image with colors corresponding to their IDs.
         
@@ -370,7 +370,7 @@ class visual_image():
 
 
     def add_text_with_background(self,image: np.ndarray, text: str, position=(10, 10), 
-                                font_scale=1, font_thickness=3, 
+                                font_scale=1.5, font_thickness=3, 
                                 text_color=(255, 255, 255), background_color=(0, 0, 0)) -> np.ndarray:
         """
         Adds text with a tightly fitted background rectangle to an image.

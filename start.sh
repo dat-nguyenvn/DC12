@@ -39,7 +39,8 @@ git clone https://github.com/obss/sahi.git
  -e XAUTHORITY=/tmp/.docker.xauth\
  -v /home/ah23975/mypc/2025/github/DC12:/DC12\
  -v /home/ah23975/mypc/2025/github/mount:/mount\
- --name github 1cff6923bda0
+ -v /media/ah23975/Data:/mnt\
+  --name wl 1cff6923bda0
  
  
  

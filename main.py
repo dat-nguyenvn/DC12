@@ -40,7 +40,7 @@ from wildlive.points_selection import *
 from wildlive.visualization import *
 from wildlive.matching import matching_module,calculate_average_distance,unique_id_not_in_matched_box,center_of_box_detected
 from wildlive.reconstruct import reconstruct_process
-from wildlive.utils.utils import compute_centroid, check_box_overlap,need_add_id_and_point,need_increase_point_for_id,load_config
+from wildlive.utils.utils import compute_centroid, check_box_overlap,need_add_id_and_point,need_increase_point_for_id,load_config,find_positions_multiple_values
 from wildlive.utils.save import save_in_step
 from wildlive.videosource import rtsp_stream,input_folder,videosourceprovider
 from wildlive.ultilkenya import filter_dict_main_overlap_box,draw_window_and_center
@@ -126,7 +126,7 @@ with vpi.Backend.CPU:
 points_np = np.array(trackpoint_list_tuple, dtype=np.float32)
 curFeatures = vpi.asarray(points_np)
 with vpi.Backend.CUDA:
-    optflow = vpi.OpticalFlowPyrLK(frame, curFeatures, 4)
+    optflow = vpi.OpticalFlowPyrLK(frame, curFeatures, 5)
 
 while True:
     start_time = time.time()
@@ -144,8 +144,10 @@ while True:
     with vpi.Backend.CUDA:
         frame = vpi.asimage(cvFrame, vpi.Format.BGR8).convert(vpi.Format.U8)
     print("id_list_intrack",set(id_list_intrack))
-    filtered_data = {k: list_dict_info_main[k] for k in set(id_list_intrack) if k in list_dict_info_main}
-    list_dict_info_main=filtered_data
+    #filtered_data = {k: list_dict_info_main[k] for k in set(id_list_intrack) if k in list_dict_info_main}
+    test_dict,rmidx=CheckInfoDict().apply(list_dict_info_main,id_list_intrack)
+    rmi=find_positions_multiple_values(id_list_intrack,list(rmidx))
+    list_dict_info_main=test_dict
     curFeatures, status = optflow(frame)
 
     list_of_tuples = [tuple(map(int, row)) for row in curFeatures.cpu().tolist()]
@@ -155,11 +157,16 @@ while True:
 
     row_at_the_edge=np.where(np.any(curFeatures.cpu() < 5, axis=1))[0].tolist()
 
-    idx_list_need_remove=list(set(idx_list_need_remove_status + row_at_the_edge))
+    idx_list_need_remove=list(set(idx_list_need_remove_status + row_at_the_edge +rmi))
+
+    print("idx_list_need_remove",idx_list_need_remove)
     if len(idx_list_need_remove)>0:
+        print("id_list_intrack",set(id_list_intrack))
         curFeatures, status,id_list_intrack,history_point_inmask=remove_intrack().apply_remove(idx_list_need_remove,curFeatures,status,id_list_intrack,history_point_inmask)       
+        print("id_list_intrack",set(id_list_intrack))
+
         with vpi.Backend.CUDA:
-            optflow = vpi.OpticalFlowPyrLK(frame, curFeatures, 4)
+            optflow = vpi.OpticalFlowPyrLK(frame, curFeatures, 5)
 
 
 
@@ -170,14 +177,16 @@ while True:
     
     window_detection=crop_window(cvFrame,center_crop,window_size=winsize)
     #print("window_detection",window_detection[0].shape)
-    all_out_detector=model.predict(window_detection,show_boxes=False, save_crop=False ,show_labels=False,show_conf=False,save=False, classes=[20,22,23] ,conf=0.5,imgsz=(640,640),device='cuda:0')  # [20,22,23][0,1,2,3,5,7]
-
+    all_out_detector=model.predict(window_detection,show_boxes=False, save_crop=False ,show_labels=False,show_conf=False,save=False,classes=[20,22,23] , conf=0.3,imgsz=(640,640),device='cuda:0')  # [20,22,23][0,1,2,3,5,7]
+    #classes=[20,22,23] ,
     history_point_inmask = [x + 1 for x in history_point_inmask]
     
     for m in range (0,n_window):
         box_id2=None
         out_detector=[all_out_detector[m]]
-        if out_detector[0].masks!=None:            
+        if out_detector[0].masks!=None:  
+            print("list_dict_info_main",type(list_dict_info_main))
+
             poatabel=matching_module().poa_table(curFeatures.cpu(),out_detector,id_list_intrack,center_crop[m],window_size=winsize)
             ioutable=matching_module().iou_table(list_dict_info_main,curFeatures.cpu(),out_detector,id_list_intrack,center_crop[m],window_size=winsize)
             ioutable=matching_module().accumulate_lists(poatabel,ioutable)
@@ -200,14 +209,14 @@ while True:
                 list_dict_info_main,curFeatures,id_list_intrack,history_point_inmask=add_points().apply_add_process_need_more_points(dict_id_need_increase_point,show_image,list_dict_info_main,box_id2,out_detector,center_crop[m],curFeatures.cpu(),id_list_intrack,history_point_inmask,window_size=winsize)
                 with vpi.Backend.CUDA:
                     curFeatures=vpi.asarray(curFeatures)
-                    optflow = vpi.OpticalFlowPyrLK(frame, curFeatures, 4)
+                    optflow = vpi.OpticalFlowPyrLK(frame, curFeatures, 5)
 
             list_dict_info_main=update().step_update_detected_bbox_to_main_dict(list_dict_info_main,out_detector,id_list_intrack,[tuple(map(int, row)) for row in curFeatures.cpu().tolist()],box_id2,center_crop[m])
         if need_add_id_and_point(box_id2):
             list_dict_info_main,curFeatures,id_list_intrack,history_point_inmask=add_points().apply_add_process_new_id(show_image,w,h,list_dict_info_main,box_id2,out_detector,center_crop[m],curFeatures.cpu(),id_list_intrack,history_point_inmask,thesshold_area_each_animal,window_size=winsize)
             with vpi.Backend.CUDA:
                 curFeatures=vpi.asarray(curFeatures)
-                optflow = vpi.OpticalFlowPyrLK(frame, curFeatures, 4)
+                optflow = vpi.OpticalFlowPyrLK(frame, curFeatures, 5)
 
 
     ##### END #####
@@ -226,7 +235,7 @@ while True:
     # small_text_image=visual_image().visual_bounding_box_of_dict(list_dict_info_main,rgb_image,id_list_intrack,fontscale=1)
     # small_text_image=visual_image().draw_pixels_with_colors(small_text_image,curFeatures.cpu(),id_list_intrack,list_dict_info_main,radius=5)
     show_end_image=visual_image().add_text_with_background(show_end_image,text_fps)
-    show_end_image=visual_image().add_text_with_background(show_end_image,text_image_size, position=(w-400,10) )
+    show_end_image=visual_image().add_text_with_background(show_end_image,text_image_size, position=(w-700,10) )
     name="frame_"+str(idFrame)+".jpg"
     file_path = os.path.join(save_folder, name)
     plt.imsave(file_path, show_end_image)

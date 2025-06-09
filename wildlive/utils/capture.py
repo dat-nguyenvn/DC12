@@ -62,8 +62,8 @@ def main():
     # Extract frames from each video file
     for video_file in video_files:
         video_path = os.path.join(args.video_folder, video_file)
-        #extract_all_frames(video_path, args.output_folder)
-        extract_frames(video_path, args.output_folder)
+        extract_all_frames(video_path, args.output_folder)
+        #extract_frames(video_path, args.output_folder)
 
 if __name__ == '__main__':
     main()

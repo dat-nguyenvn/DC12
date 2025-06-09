@@ -39,6 +39,7 @@ class remove_intrack():
     def apply_remove(self,idx_list_need_remove,featurecpu,sat,id_list_intrack,history):
         
         idx_list_need_remove=self.remove_duplicates(idx_list_need_remove)
+        print("idx_list_need_remove aaaaaaaaa",idx_list_need_remove)
         with featurecpu.lock_cpu() as curFeatures_cpu:
             with sat.lock_cpu() as status_cpu:
                 
