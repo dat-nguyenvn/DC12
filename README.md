@@ -91,10 +91,11 @@ cd ..
 If you use this code or find our work useful, please cite our paper:
 
 ```bibtex
-@inproceedings{dat2025wildlive,
-  title     = {WildLive: Near Real-time Visual Wildlife Tracking onboard {UAV}s},
-  author    = {Nguyen Ngoc Dat and Thomas Stuart Richardson and Matthew Watson and Kilian Meier and Jenna Marie Kline and Sid Reid and Guy Maalouf and Duncan Hine and Majid Mirmehdi and Tilo Burghardt},
-  booktitle = {5th Workshop on CV4Animals: Computer Vision for Animal Behavior Tracking and Modeling, In conjunction with Computer Vision and Pattern Recognition 2025},
-  year      = {2025},
-  url       = {https://openreview.net/forum?id=3P5Av4siHg}
-}
+@inproceedings{
+  dat2025wildlive,
+  title={WildLive: Near Real-time Visual Wildlife Tracking onboard {UAV}s},
+  author={Nguyen Ngoc Dat and Thomas Stuart Richardson and Matthew Watson and Kilian Meier and Jenna Marie Kline and Sid Reid and Guy Maalouf and Duncan Hine and Majid Mirmehdi and Tilo Burghardt},
+  booktitle={5th Workshop on CV4Animals: Computer Vision for Animal Behavior Tracking and Modeling, In conjunction with Computer Vision and Pattern Recognition 2025},
+  year={2025},
+  url={https://drive.google.com/file/d/1F5pAptwMLmd78ZhzqTsXVDpK_v-hEeLC/view}
+  }
